@@ -2,9 +2,16 @@ import { Fragment} from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import Counter from './counter'
+import { useRouter } from 'next/router'
 
 
 const ProductPage = ({widgetProduct, open, setOpen}) => {
+  const router = useRouter()
+
+  const backToCatalogPage = () => {
+    setOpen(false);
+    router.push('/catalog-page');
+  }
   return (
     <Transition.Root show={open} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={setOpen}>
@@ -36,7 +43,7 @@ const ProductPage = ({widgetProduct, open, setOpen}) => {
                   <button
                     type="button"
                     className="absolute top-4 right-4 text-gray-400 hover:text-gray-500 sm:top-8 sm:right-6 md:top-6 md:right-6 lg:top-8 lg:right-8"
-                    onClick={() => setOpen(false)}
+                    onClick={backToCatalogPage}
                   >
                     <span className="sr-only">Close</span>
                     <XMarkIcon className="h-6 w-6" aria-hidden="true" />
