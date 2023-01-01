@@ -1,9 +1,31 @@
 import {useState} from 'react';
 import ProductPage from "../components/product-widget";
+import { useRouter } from 'next/router'
 
 const CatalogPage = () => {
+    const router = useRouter()
+
     const [open, setOpen] = useState(false)
     const [widgetProduct, setWidgetProduct] = useState()
+    const [searchName, setSearchName] = useState()
+    const [filteredBooksArray, setFilteredBooksArray] = useState()
+
+    
+    const newBookArray = (e) => {
+        if(e.key === 'Enter'){
+            if(searchName.length > 0){
+                const smallSearchName = searchName.toLowerCase()
+               const filteredBooks =  products.filter(item=> item.name.toLocaleLowerCase() === smallSearchName)
+               console.log(filteredBooks)
+               setFilteredBooksArray(filteredBooks)
+               router.push(`#${searchName}`);
+
+
+            }else{
+                return products;
+            }
+        }
+    } 
 
     const openProductPage =(e) => {
         setOpen(true)
@@ -12,6 +34,7 @@ const CatalogPage = () => {
         setWidgetProduct(filteredObject);
 
     }
+
     const products = [
         {
           id: 1,
@@ -48,24 +71,70 @@ const CatalogPage = () => {
     return(
         <div className="catalog-page">
             <div className="bg-white">
-                <div className="mx-auto max-w-2xl py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
+                <div className="mx-auto max-w-2xl py-16 px-4 sm:py-5 sm:px-6 lg:max-w-7xl lg:px-8">
                     <h2 className="sr-only">Products</h2>
-                    <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
-                        {products.map((product) => (
-                        <a key={product.id} id={product.id} href={`#${product.name}`} onClick={openProductPage} className="group">
-                            <ProductPage widgetProduct= {widgetProduct} open= {open} setOpen= {setOpen}/>
-                            <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-w-7 xl:aspect-h-8">
-                            <img
-                                src={product.imageSrc}
-                                alt={product.imageAlt}
-                                className="h-full w-full object-cover object-center group-hover:opacity-75"
-                            />
+
+                    <div className='max-w-md mx-auto mb-10'>
+                        <div className="relative flex items-center w-full h-12 rounded-lg focus-within:shadow-lg bg-white overflow-hidden">
+                            <div className="grid place-items-center h-full w-12 text-gray-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" strokeLinejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
                             </div>
-                            <h3 className="mt-4 text-sm text-gray-700">{product.name}</h3>
-                            <p className="mt-1 text-lg font-medium text-gray-900">{product.price}</p>
-                        </a>
-                        ))}
+
+                            <input
+                            className="peer h-full w-full outline-none text-sm text-gray-700 pr-2"
+                            type="text"
+                            id="search"
+                            value={searchName}
+                            onChange= {(e)=> setSearchName(e.target.value)}
+                            onKeyDown={newBookArray}
+                            placeholder="Search for books.." /> 
+                        </div>
                     </div>
+
+                    {
+                        filteredBooksArray ? (
+                            <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+                                {
+                                    filteredBooksArray.map((book) => (
+                                        <a key={book.id} id={book.id} href={`#${book.name}`} onClick={openProductPage} className="group">
+                                            <ProductPage widgetProduct= {widgetProduct} open= {open} setOpen= {setOpen}/>
+                                            <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-w-7 xl:aspect-h-8">
+                                                <img
+                                                    src={book.imageSrc}
+                                                    alt={book.imageAlt}
+                                                    className="h-full w-full object-cover object-center group-hover:opacity-75"
+                                                />
+                                            </div>
+                                            <h3 className="mt-4 text-sm text-gray-700">{book.name}</h3>
+                                            <p className="mt-1 text-lg font-medium text-gray-900">{book.price}</p>
+                                    </a>
+                                    ))
+                                }
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+                                {products.map((product) => (
+                                    <a key={product.id} id={product.id} href={`#${product.name}`} onClick={openProductPage} className="group">
+                                        <ProductPage widgetProduct= {widgetProduct} open= {open} setOpen= {setOpen}/>
+                                        <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-w-7 xl:aspect-h-8">
+                                            <img
+                                                src={product.imageSrc}
+                                                alt={product.imageAlt}
+                                                className="h-full w-full object-cover object-center group-hover:opacity-75"
+                                            />
+                                        </div>
+                                        <h3 className="mt-4 text-sm text-gray-700">{product.name}</h3>
+                                        <p className="mt-1 text-lg font-medium text-gray-900">{product.price}</p>
+                                    </a>
+                                ))}
+                            </div>
+
+                        )
+                    }
+
+                    
                 </div>
             </div>
         </div>
