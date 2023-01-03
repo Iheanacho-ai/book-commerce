@@ -31,10 +31,10 @@ export default function Home() {
               <div className="grid max-w-md grid-cols-1 gap-6 mx-auto auto-rows-fr lg:grid-cols-3 lg:max-w-full">
                 <div className="flex flex-col overflow-hidden border-2 rounded-md">
                   <div className="flex flex-col items-center justify-center px-2 py-8 space-y-4">
-                    <p className="text-lg font-medium">Personal</p>
-                    <p className="text-5xl font-bold">30$
-                      <span className="text-xl"> /mo</span>
-                    </p>
+                    <p className="text-lg font-medium">Starter</p>
+                      <p className="text-5xl font-bold">30$
+                        <span className="text-xl"> /mo</span>
+                      </p>
                   </div>
                   <div className="flex flex-col items-center justify-center px-2 py-8">
                     <ul className="self-stretch flex-1 space-y-2">
