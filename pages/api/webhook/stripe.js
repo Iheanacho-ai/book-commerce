@@ -1,68 +1,73 @@
+import nc from 'next-connect';
 import Stripe from 'stripe';
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2020-08-27' });
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-
-const handler = () => {
-    let event = request.body;
-    // Replace this endpoint secret with your endpoint's unique secret
-    // If you are testing with the CLI, find the secret by running 'stripe listen'
-    // If you are using an endpoint defined with the API or dashboard, look in your webhook settings
-    // at https://dashboard.stripe.com/webhooks
-    const endpointSecret = 'whsec_12345';
-    // Only verify the event if you have an endpoint secret defined.
-    // Otherwise use the basic event deserialized with JSON.parse
-    if (endpointSecret) {
-    // Get the signature sent by Stripe
-    const signature = request.headers['stripe-signature'];
+const handleStripeWebhook = async (req, res) => {
     try {
-        event = stripe.webhooks.constructEvent(
-        request.body,
-        signature,
-        endpointSecret
+        const event = stripe.webhooks.constructEvent(
+            req.body,
+            req.headers['stripe-signature'],
+            process.env.STRIPE_WEBHOOK_SECRET
         );
-    } catch (err) {
-        console.log(`⚠️  Webhook signature verification failed.`, err.message);
-        return response.sendStatus(400);
+    } catch (e) {
+        console.error(e);
+        res.send(400);
     }
-    }
-    let subscription;
-    let status;
-    // Handle the event
+
     switch (event.type) {
-    case 'customer.subscription.trial_will_end':
-        subscription = event.data.object;
-        status = subscription.status;
-        console.log(`Subscription status is ${status}.`);
-        // Then define and call a method to handle the subscription trial ending.
-        // handleSubscriptionTrialEnding(subscription);
-        break;
-    case 'customer.subscription.deleted':
-        subscription = event.data.object;
-        status = subscription.status;
-        console.log(`Subscription status is ${status}.`);
-        // Then define and call a method to handle the subscription deleted.
-        // handleSubscriptionDeleted(subscriptionDeleted);
-        break;
-    case 'customer.subscription.created':
-        subscription = event.data.object;
-        status = subscription.status;
-        console.log(`Subscription status is ${status}.`);
-        // Then define and call a method to handle the subscription created.
-        // handleSubscriptionCreated(subscription);
-        break;
-    case 'customer.subscription.updated':
-        subscription = event.data.object;
-        status = subscription.status;
-        console.log(`Subscription status is ${status}.`);
-        // Then define and call a method to handle the subscription update.
-        // handleSubscriptionUpdated(subscription);
-        break;
-    default:
-        // Unexpected event type
-        console.log(`Unhandled event type ${event.type}.`);
+        case 'subscription.created': {
+            const subscription = event.data.object;
+            // You can use this to detect changes in the subscription
+            // subscription.status will return the current status of the subscription
+            //
+            // Things you can do here:
+            // 1. Send a thank you email to the user
+            // 2. Send content you've created that would enhance the user's experience/workflow
+            break;
+        }
+
+        case 'customer.subscription.deleted':
+        case 'customer.subscription.updated': {
+            const subscription = event.data.object;
+            // You can use this to detect changes in the subscription
+            // subscription.status will return the current status of the subscription
+            //
+            // Things you can do here:
+            // 1. Send an email to the user notifying them about the change in subscription status
+            // 2. If the user cancelled the subscription you could trigger
+            // a email campaign to inform users of the beneits they're missing out on.
+            break;
+        }
+
+        case 'invoice.paid': {
+            const invoice = event.data.object;
+            // If you have trials, this event is triggered when the trial ended and the user was charged for continued access
+            // Things you can do:
+            // 1. Notify the user of the charge
+            // 2. Thank them for their continued belief in your product
+            // 3. Send additional content that could enable better workflows for the user
+            break;
+        }
+
+        case 'invoice.payment_failed': {
+            const invoice = event.data.object;
+            // The payment fails or the user does not have a valid payment method
+            // The subscription is now past due
+            // You can notify the user that the payment has failed
+            // and ask them to use different payment methods
+            // or revoke their access
+            break;
+        }
+
+        default: {
+            console.error(`Unhandled event type: ${event.type}`);
+            break;
+        }
     }
-    // Return a 200 response to acknowledge receipt of the event
-    response.send();
-}
+
+    res.status(200);
+};
+
+const handler = nc({ attachParams: true }).post(handleStripeWebhook);
 
 export default handler;

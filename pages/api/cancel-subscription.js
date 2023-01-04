@@ -3,10 +3,8 @@ import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const handler= async (req, res) => {
+    const {subscriptionId} = req.body
     try {
-        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2020-08-27' });
-        const { subscriptionId } = req.body;
-
         const deletedSubscription = await stripe.subscriptions.del(
             subscriptionId
         );
@@ -25,3 +23,4 @@ const handler= async (req, res) => {
 };
 
 export default handler;
+

@@ -1,24 +1,29 @@
 import {useState} from 'react';
 
 const ProductDisplay = () => {
-    const [lookup_key, setLookup_key] = useState("price_1MLWXPBpQhjuYMrzCRJnTnZF")
+    const [priceId, setPriceId] = useState('');
+    const [customerId, setCustomerId] = useState('cus_N6Z4u3wocqYsS0');
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const createSubscription = async (e) => {
+        setPriceId(e.target.id)
+
         try {
-            await fetch('/api/create-account-session', {
+            await fetch('/api/create-subscription', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    lookup_key 
+                    priceId,
+                    customerId
                 })
             })
+            
+            
         } catch (error) {
             console.log(error)
         }
-    };
+    }
   
     return (
         <div className='flex min-h-screen pt-[30px] px-[40px]'>
@@ -52,12 +57,10 @@ const ProductDisplay = () => {
                         </div>
 
                         <div className="pt-[25px] px-[25px] pb-[35px]">
-                            <form onSubmit={handleSubmit} method="post">
                                 <div className="mt-[25px]">
-                                    <input type="hidden" name="lookup_key" value={lookup_key} />
-                                    <button className="bg-[#006EF5] rounded-[5px] py-[15px] px-[25px] text-[#fff] text-[14px] leading-[17px] font-semibold"  id="checkout-and-portal-button" type="submit">Choose Plan</button>
+                                    <input type="hidden" name="lookup_key" />
+                                    <button className="bg-[#006EF5] rounded-[5px] py-[15px] px-[25px] text-[#fff] text-[14px] leading-[17px] font-semibold"  id="price_1MLWJFBpQhjuYMrzoyyf6uwq" type="button" onClick={createSubscription}>Choose Plan</button>
                                 </div>
-                            </form>
                         </div>
                     </div>
                 </div>
