@@ -1,5 +1,6 @@
 // ./utils/get-stripejs.ts
 import { Stripe, loadStripe } from '@stripe/stripe-js';
+import { createClient } from '@supabase/supabase-js'
 
 let stripePromise: Promise<Stripe | null>;
 const getStripe = () => {
@@ -10,3 +11,6 @@ const getStripe = () => {
 };
 
 const getstripe = getStripe()
+
+// Create a single supabase client for interacting with your database
+export const supabase = createClient('https://kquopthsrnfngrtqsbiq.supabase.co', process.env.NEXT_PUBLIC_SUPABASE_KEY)
