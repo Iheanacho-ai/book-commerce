@@ -3,16 +3,16 @@ import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const handler = async (req, res) => {
-    const {name, email} = req.body
+    const {email} = req.body
     try {
         const customer = await stripe.customers.create({
-            email: email,
-            name: name
+            email: email
         });
         res.status(200).json({
             code: 'customer_created',
             customer,
         })
+
         
     } catch (error) {
         console.log(error);

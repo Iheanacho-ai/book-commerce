@@ -1,4 +1,7 @@
 import {useState} from 'react';
+import { Stripe } from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const subscriptionPackages = [
     {
@@ -18,15 +21,16 @@ const subscriptionPackages = [
     },
 ]
 
-const ProductDisplay = () => {    
+const ProductDisplay = ({customerId}) => { 
+    
+    console.log(customerId, 'props')
     const [priceId, setPriceId] = useState('');
-    const [customerId, setCustomerId] = useState('cus_N6Z4u3wocqYsS0');
 
     const createSubscription = async (e) => {
         setPriceId(e.target.id)
 
         try {
-            await fetch('/api/create-subscription', {
+           const subscriptionDetails = await fetch('/api/create-subscription', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -37,6 +41,8 @@ const ProductDisplay = () => {
                 })
             })
             
+            console.log(subscriptionDetails, 'subscriptionDetails');
+            alert('it kinda worked')
             
         } catch (error) {
             console.log(error)
@@ -59,7 +65,7 @@ const ProductDisplay = () => {
                 <div className="mt-[20px] grid grid-cols-3 gap-[20px]">
                     {
                         subscriptionPackages.map(({subscriptionPackage, price, priceId}) => (
-                            <div key="1" className="w-full bg-[#fff] rounded-[10px] shadow-[0px 1px 2px #E1E3E5] border border-[#E1E3E5] divide-y">
+                            <div key={priceId} className="w-full bg-[#fff] rounded-[10px] shadow-[0px 1px 2px #E1E3E5] border border-[#E1E3E5] divide-y">
                                 <div className="pt-[15px] px-[25px] pb-[25px]">
                                     <div className="flex justify-end">
                                         <div className="bg-[#F6F6F7] rounded-[20px] flex justify-center align-center px-[12px]">
@@ -91,5 +97,6 @@ const ProductDisplay = () => {
         </div>
     )
 }
+
 
 export default ProductDisplay;

@@ -1,11 +1,31 @@
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useRouter } from 'next/router'
+import { useState } from 'react'
 
 
 const AccountPage = ({user}) => {
     const supabaseClient = useSupabaseClient()
     const router = useRouter()
+    const [subscriptionId, setSubscriptionId] = useState() 
+    
+
+    const cancelSubscription = async () => {
+        try {
+            await fetch('/api/cancel-subscription', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                   subscriptionId
+                })
+            }) 
+        } catch (error) {
+            console.log(error)            
+        }
+
+    }
 
 
     const signOut = async () => {
@@ -46,7 +66,7 @@ const AccountPage = ({user}) => {
                             <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">user.email</dd>
                         </div>
                     </dl>
-                    <button className='lg:inline-block ml-4 lg:mr-3 py-2 px-6 mt-6 mb-6 text-white bg-red-600 hover:bg-blue-700 text-sm text-gray-900 font-bold rounded-xl right-0'>Cancel Subscription</button>
+                    <button className='lg:inline-block ml-4 lg:mr-3 py-2 px-6 mt-6 mb-6 text-white bg-red-600 hover:bg-blue-700 text-sm text-gray-900 font-bold rounded-xl right-0' onClick={cancelSubscription}>Cancel Subscription</button>
                 </div>
             </div>     
         </div>

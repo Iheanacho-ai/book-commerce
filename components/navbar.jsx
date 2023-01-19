@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import {useUser} from '@supabase/auth-helpers-react';
-import { FaRegUserCircle } from "react-icons/fa";
+import { FaRegUserCircle, FaShoppingBag } from "react-icons/fa";
 
 function Navbar() {
     const user = useUser()
@@ -51,13 +51,18 @@ function Navbar() {
                         </svg>
                     </li>
                     <li><Link className="text-sm text-gray-400 hover:text-gray-500" href="#">Contact</Link></li>
-                </ul>
+                </ul> 
                 
                 {
                     user? (
-                        <Link href="/account" className="hidden text-gray-400 hover:text-gray-500 text-2xl lg:block">
-                            <FaRegUserCircle/>
-                        </Link>
+                        <div className="people border-red hidden lg:flex w-12 mr-7">
+                            <Link href="/order" className="text-gray-400 hover:text-gray-500 text-2xl">
+                                <FaShoppingBag/>
+                            </Link>
+                            <Link href="/account" className="text-gray-400 hover:text-gray-500 text-2xl ml-3 mr-5">
+                                <FaRegUserCircle/>
+                            </Link>
+                        </div>
 
                     ) : (
                         <Link className="hidden lg:inline-block lg:ml-auto lg:mr-3 py-2 px-6  text-white bg-blue-600 hover:bg-blue-700 text-sm text-gray-900 font-bold rounded-xl transition duration-200" href="/signin">Sign In</Link>
