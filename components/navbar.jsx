@@ -6,9 +6,12 @@ import { FaRegUserCircle, FaShoppingBag } from "react-icons/fa";
 function Navbar() {
     const user = useUser()
     const [toggle, setToggle] = useState(false)
+
     const controlToggle = () => {
         setToggle(!toggle)
     }
+
+
 	return (
 		<div className="bg-blue-500">
             <nav className="relative px-4 py-4 flex justify-between items-center bg-white">

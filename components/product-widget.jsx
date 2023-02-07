@@ -1,17 +1,87 @@
 import { Fragment} from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
+import { useState } from 'react'
 import Counter from './counter'
 import { useRouter } from 'next/router'
+import {supabase} from '../utils/index';
 
 
 const ProductPage = ({widgetProduct, open, setOpen}) => {
   const router = useRouter()
+  const [counter, setCounter] = useState(0)
 
   const backToCatalogPage = () => {
     setOpen(false);
     router.push('/catalog-page');
   }
+
+  const addBookToBag = async () => {
+    if (widgetProduct) {
+      // checks if the quantity of the wishlist item is greater than zero
+      
+      if (counter > 0){
+        const {name, price, imageSrc, imageAlt, id } = widgetProduct[0]
+        
+        //check if the object exists already on our database using the ID
+        const { data, error } = await supabase
+          .from('cartItems')
+          .select()
+          .eq('id', id)
+
+        if(data.length){
+          // if data exists get its quantity and add it to new quantity
+          const newQuantity = data[0].quantity + counter
+
+          //update the cart item on the database
+          
+          const { error } = await supabase
+            .from('cartItems')
+            .update({ quantity: newQuantity })
+            .eq('id', id)
+
+          if(error){
+            // console any error we encounter along the way
+            console.log(error)
+            alert('Error adding the item to your wishlist')
+          }else{
+            // alert that we have added to our wishlist successfully
+
+            alert('item added successfully to wishlist')
+          }
+          
+        }else{
+          // add a new item if the item is not available on our database
+          const { error } = await supabase
+            .from('cartItems')
+            .insert(
+              { 
+                id, 
+                name,
+                price,
+                image_src: imageSrc,
+                image_alt: imageAlt,
+                quantity: counter
+              }
+            )
+            
+          if(error){
+            // console any error encountered
+
+            console.log(error)
+            alert('Error adding the item to your wishlist')
+          }else{
+            alert('item added to Wishlist')
+          }
+
+        }
+      }else{
+        alert("Quantity must be greater than 0")
+      }
+        
+    }
+  }
+
   return (
     <Transition.Root show={open} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={setOpen}>
@@ -67,7 +137,7 @@ const ProductPage = ({widgetProduct, open, setOpen}) => {
                               Lorem ipsum dolor sit amet consectetur adipisicing elit. Nemo voluptatibus nesciunt dolores tenetur, alias ullam porro et mollitia autem quis corporis eligendi, nulla minima vitae? Atque, sequi? Delectus, itaque id.
                             </p>
 
-                            <p className="text-2xl text-gray-900">{widgetProduct[0].price}</p>
+                            <p className="text-2xl text-gray-900">${widgetProduct[0].price}</p>
                           </section>
 
                           <section aria-labelledby="options-heading" className="mt-5">
@@ -75,12 +145,13 @@ const ProductPage = ({widgetProduct, open, setOpen}) => {
                               Product Quantity
                             </h3>
 
-                            <Counter/>
+                            <Counter counter= {counter} setCounter={setCounter}/>
 
                             <form>
                               <button
-                                type="submit"
+                                type="button"
                                 className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 py-3 px-8 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                onClick = {addBookToBag}
                               >
                                 Add to Bag
                               </button>

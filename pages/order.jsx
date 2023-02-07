@@ -1,40 +1,57 @@
 import { useEffect, useState } from "react";
+import {supabase} from '../utils/index';
+import { FaWindowClose } from "react-icons/fa";
 
 const Bag = () => {
   const [orderTotal, setOrderTotal] = useState()
-  const orderItems = [
-    {
-      name: "Premium Quality Dress",
-      price: 36,
-      quantity: 2,
-      imageURL: 'https://i.ibb.co/84qQR4p/Rectangle-10.png',
-      lgImageUrl: "https://i.ibb.co/L039qbN/Rectangle-10.png",
-      id: 1
-    },
-    {
-      name: "High Quaility Italic Dress",
-      price: 20,
-      quantity: 3,
-      quantity: 2,
-      imageURL: 'https://i.ibb.co/84qQR4p/Rectangle-10.png',
-      lgImageUrl: "https://i.ibb.co/L039qbN/Rectangle-10.png",
-      id: 2
-
-    }
-  ]
+  const [cartData, setCartData] = useState()
   
   const sumOfOrder = () => {
-    let accumulatedPrice = orderItems.reduce(function (accumulator, item) {
-      return accumulator + item.price * item.quantity;
-    }, 0);
-
-    setOrderTotal(accumulatedPrice)
+    if (cartData) {
+      let accumulatedPrice = cartData.reduce(function (accumulator, item) {
+        return accumulator + item.price * item.quantity;
+      }, 0);
+  
+      setOrderTotal(accumulatedPrice)  
+    }else{
+      return;
+    }
 
   }
-  useEffect(() => { 
-    sumOfOrder(),
-    console.log(orderTotal, 'orderTotal')
-  }, [orderTotal])
+
+  const retrieveCartData = async () => {
+    const { data, error } = await supabase
+      .from('cartItems')
+      .select()
+    
+      if (error) {
+        console.log(error)
+      } else {
+        setCartData(data) 
+      }
+  }
+
+  useEffect(()=> {
+    retrieveCartData()
+    sumOfOrder()
+  }, [])
+
+  const deleteData = async (id) => {
+    const { error } = await supabase
+      .from('cartItems')
+      .delete()
+      .eq('id', id)
+
+    if(error){
+      alert('error encountered during deletion')
+      console.log(error)
+    }else{
+      alert('item deleted successfully')
+      retrieveCartData()
+    }
+    
+
+  }
 
   return(
     <div className="bag">
@@ -44,31 +61,39 @@ const Bag = () => {
             <div className="flex flex-col justify-start items-start dark:bg-gray-800 bg-gray-50 px-4 py-4 md:py-6 md:p-6 xl:p-8 w-full">
               <p className="text-lg md:text-xl dark:text-white font-semibold leading-6 xl:leading-5 text-gray-800">Your WishList</p>
               {
-                orderItems ? (
+                cartData ? (
                   <div>
                     {
-                      orderItems.map((item) => (
+                      cartData.map((item) => (
                         <div className="mt-4 md:mt-6 flex flex-col md:flex-row justify-start items-start md:items-center md:space-x-6 xl:space-x-8 w-full" key={item.id}>
                           <div className="pb-4 md:pb-8 w-full md:w-40">
-                            <img className="w-full hidden md:block" src={item.imageURL} alt="dress" />
-                            <img className="w-full md:hidden" src={item.lgImageUrl} alt="dress" />
+                            <img className="w-full hidden md:block" src={item.image_src} alt="dress" />
+                            <img className="w-full md:hidden" src={item.image_src} alt="dress" />
                           </div>
                           <div className="border-b border-gray-200 md:flex-row flex-col flex justify-between items-start w-full pb-8 space-y-4 md:space-y-0">
                             <div className="w-full flex flex-col justify-start items-start space-y-8">
                               <h3 className="text-xl dark:text-white xl:text-2xl font-semibold leading-6 text-gray-800">{item.name}</h3>
                             </div>
-                            <div className="flex justify-between space-x-8 items-start w-full">
+                            <div className="flex justify-between space-x-12 items-start w-full">
                               <p className="text-base dark:text-white xl:text-lg leading-6">${item.price}</p>
                               <p className="text-base dark:text-white xl:text-lg leading-6 text-gray-800">{item.quantity}</p>
                               <p className="text-base dark:text-white xl:text-lg font-semibold leading-6 text-gray-800">${item.price * item.quantity }</p>
+                              <button className="text-2xl" onClick={() => {deleteData(item.id)}}>
+                                <FaWindowClose/>
+                              </button>
                             </div>
                           </div>
                         </div>
+                      
                       )) 
                     }
                   </div>
 
-                ) : null
+                ) : (
+                  <div className="empty-cart">
+                    <h3>Add books to your cart to see them here.</h3>
+                  </div>
+                )
               }
             </div>
             <div className="flex justify-center flex-col md:flex-row flex-col items-stretch w-full space-y-4 md:space-y-0 md:space-x-6 xl:space-x-8">
@@ -79,18 +104,10 @@ const Bag = () => {
                     <p className="text-base dark:text-white leading-4 text-gray-800">Subtotal</p>
                     <p className="text-base dark:text-gray-300 leading-4 text-gray-600">${orderTotal}</p>
                   </div>
-                  <div className="flex justify-between items-center w-full">
-                    <p className="text-base dark:text-white leading-4 text-gray-800">Discount <span className="bg-gray-200 p-1 text-xs font-medium dark:bg-white dark:text-gray-800 leading-3 text-gray-800">STUDENT</span></p>
-                    <p className="text-base dark:text-gray-300 leading-4 text-gray-600">-$28.00 (50%)</p>
-                  </div>
-                  <div className="flex justify-between items-center w-full">
-                    <p className="text-base dark:text-white leading-4 text-gray-800">Shipping</p>
-                    <p className="text-base dark:text-gray-300 leading-4 text-gray-600">$8.00</p>
-                  </div>
                 </div>
                 <div className="flex justify-between items-center w-full">
                   <p className="text-base dark:text-white font-semibold leading-4 text-gray-800">Total</p>
-                  <p className="text-base dark:text-gray-300 font-semibold leading-4 text-gray-600">$36.00</p>
+                  <p className="text-base dark:text-gray-300 font-semibold leading-4 text-gray-600">${orderTotal}</p>
                 </div>
               </div>
               <div className="flex flex-col justify-center px-4 py-6 md:p-6 xl:p-8 w-full bg-gray-50 dark:bg-gray-800 space-y-6">
@@ -146,5 +163,6 @@ const Bag = () => {
     </div>
   )
 }
+
 
 export default Bag;

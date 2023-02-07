@@ -39,21 +39,21 @@ const CatalogPage = () => {
         {
           id: 1,
           name: 'Earthen Bottle',
-          price: '$48',
+          price: 48,
           imageSrc: 'https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-01.jpg',
           imageAlt: 'Tall slender porcelain bottle with natural clay textured body and cork stopper.',
         },
         {
           id: 2,
           name: 'Nomad Tumbler',
-          price: '$35',
+          price: 35,
           imageSrc: 'https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-02.jpg',
           imageAlt: 'Olive drab green insulated bottle with flared screw lid and flat top.',
         },
         {
           id: 3,
           name: 'Focus Paper Refill',
-          price: '$89',
+          price: 89,
           imageSrc: 'https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-03.jpg',
           imageAlt: 'Person using a pen to cross a task off a productivity paper card.',
           reviewCount: 4
@@ -61,7 +61,7 @@ const CatalogPage = () => {
         {
           id: 4,
           name: 'Machined Mechanical Pencil',
-          price: '$35',
+          price: 35,
           imageSrc: 'https://tailwindui.com/img/ecommerce-images/category-page-04-image-card-04.jpg',
           imageAlt: 'Hand holding black machined steel mechanical pencil with brass tip and top.',
           reviewCount: 3
@@ -108,7 +108,7 @@ const CatalogPage = () => {
                                                 />
                                             </div>
                                             <h3 className="mt-4 text-sm text-gray-700">{book.name}</h3>
-                                            <p className="mt-1 text-lg font-medium text-gray-900">{book.price}</p>
+                                            <p className="mt-1 text-lg font-medium text-gray-900">${book.price}</p>
                                     </a>
                                     ))
                                 }
