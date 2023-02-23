@@ -1,13 +1,13 @@
-import { Fragment} from 'react'
+import { Fragment } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
 import Counter from './counter'
 import { useRouter } from 'next/router'
-import {supabase} from '../utils/index';
+import { supabase } from '../utils/index';
 
 
-const ProductPage = ({widgetProduct, open, setOpen}) => {
+const ProductPage = ({ widgetProduct, open, setOpen }) => {
   const router = useRouter()
   const [counter, setCounter] = useState(0)
 
@@ -19,44 +19,44 @@ const ProductPage = ({widgetProduct, open, setOpen}) => {
   const addBookToBag = async () => {
     if (widgetProduct) {
       // checks if the quantity of the wishlist item is greater than zero
-      
-      if (counter > 0){
-        const {name, price, imageSrc, imageAlt, id } = widgetProduct[0]
-        
+
+      if (counter > 0) {
+        const { name, price, imageSrc, imageAlt, id } = widgetProduct[0]
+
         //check if the object exists already on our database using the ID
         const { data, error } = await supabase
           .from('cartItems')
           .select()
           .eq('id', id)
 
-        if(data.length){
+        if (data.length) {
           // if data exists get its quantity and add it to new quantity
           const newQuantity = data[0].quantity + counter
 
           //update the cart item on the database
-          
+
           const { error } = await supabase
             .from('cartItems')
             .update({ quantity: newQuantity })
             .eq('id', id)
 
-          if(error){
+          if (error) {
             // console any error we encounter along the way
             console.log(error)
             alert('Error adding the item to your wishlist')
-          }else{
+          } else {
             // alert that we have added to our wishlist successfully
 
             alert('item added successfully to wishlist')
           }
-          
-        }else{
+
+        } else {
           // add a new item if the item is not available on our database
           const { error } = await supabase
             .from('cartItems')
             .insert(
-              { 
-                id, 
+              {
+                id,
                 name,
                 price,
                 image_src: imageSrc,
@@ -64,21 +64,21 @@ const ProductPage = ({widgetProduct, open, setOpen}) => {
                 quantity: counter
               }
             )
-            
-          if(error){
+
+          if (error) {
             // console any error encountered
 
             console.log(error)
             alert('Error adding the item to your wishlist')
-          }else{
+          } else {
             alert('item added to Wishlist')
           }
 
         }
-      }else{
+      } else {
         alert("Quantity must be greater than 0")
       }
-        
+
     }
   }
 
@@ -145,13 +145,13 @@ const ProductPage = ({widgetProduct, open, setOpen}) => {
                               Product Quantity
                             </h3>
 
-                            <Counter counter= {counter} setCounter={setCounter}/>
+                            <Counter counter={counter} setCounter={setCounter} />
 
                             <form>
                               <button
                                 type="button"
                                 className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 py-3 px-8 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                                onClick = {addBookToBag}
+                                onClick={addBookToBag}
                               >
                                 Add to Bag
                               </button>
@@ -159,7 +159,7 @@ const ProductPage = ({widgetProduct, open, setOpen}) => {
                           </section>
                         </div>
                       </div>
-                  ): null
+                    ) : null
                   }
                 </div>
               </Dialog.Panel>

@@ -5,6 +5,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 const handler = async (req, res) => {
     const {email} = req.body
     try {
+        
         const customer = await stripe.customers.create({
             email: email
         });

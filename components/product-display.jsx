@@ -1,54 +1,86 @@
-import {useState} from 'react';
-import { Stripe } from 'stripe';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+import { supabase } from '../utils/index';
+import { useRouter } from 'next/router'
+import { useState } from 'react';
 
 const subscriptionPackages = [
     {
         subscriptionPackage: "Starter",
         price: "30",
-        priceId: "price_1MLWJFBpQhjuYMrzoyyf6uwq"
+        priceID: "price_1MLWJFBpQhjuYMrzoyyf6uwq"
     },
     {
         subscriptionPackage: "Pro",
         price: "50",
-        priceId: "price_1MLWKoBpQhjuYMrzcjP4I4xm"
+        priceID: "price_1MLWKoBpQhjuYMrzcjP4I4xm"
     },
     {
         subscriptionPackage: "Family",
         price: "100",
-        priceId: "price_1MLWXPBpQhjuYMrzCRJnTnZF"
+        priceID: "price_1MLWXPBpQhjuYMrzCRJnTnZF"
     },
 ]
 
-const ProductDisplay = ({customerId}) => { 
+const ProductDisplay = ({ customerID }) => {
+    const router = useRouter()
+    console.log('product display ID', customerID)
+    const [subscriptionId, setSubscriptionId] = useState()
+    const [clientSecret, setClientSecret] = useState()
+
+    const addIdToStripe = async () => {
+        if(subscriptionId && clientSecret){
+            const { error } = await supabase
+                .from('stripe_data')
+                .insert(
+                    {
+                        id: 1,
+                        subscriptionId: subscriptionId,
+                        clientSecret: clientSecret
+                    }
     
-    console.log(customerId, 'props')
-    const [priceId, setPriceId] = useState('');
+    
+                )
 
-    const createSubscription = async (e) => {
-        setPriceId(e.target.id)
 
+            if(error){
+                console.log(error)
+            }else{
+               router.push('/payment') 
+            }
+
+        }
+
+    }
+
+    const createSubscription = async (priceID) => {
+        // create a new subscription
         try {
-           const subscriptionDetails = await fetch('/api/create-subscription', {
+            const subscriptionDetails = await fetch('/api/create-subscription', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    priceId,
-                    customerId
+                    priceID,
+                    customerID
                 })
             })
+
+            const newSubscription = await subscriptionDetails.json();
+            const {subscriptionId, clientSecret} = newSubscription
+            setSubscriptionId(subscriptionId)
+            setClientSecret(clientSecret)
+
+            // add the subscriptionId and Client secret data from stripe to supabase
             
-            console.log(subscriptionDetails, 'subscriptionDetails');
-            alert('it kinda worked')
-            
+            addIdToStripe()
+
+
         } catch (error) {
             console.log(error)
         }
     }
-  
+
+
     return (
         <div className='flex min-h-screen pt-[30px] px-[40px]'>
             <div className="min-w-full">
@@ -64,8 +96,8 @@ const ProductDisplay = ({customerId}) => {
 
                 <div className="mt-[20px] grid grid-cols-3 gap-[20px]">
                     {
-                        subscriptionPackages.map(({subscriptionPackage, price, priceId}) => (
-                            <div key={priceId} className="w-full bg-[#fff] rounded-[10px] shadow-[0px 1px 2px #E1E3E5] border border-[#E1E3E5] divide-y">
+                        subscriptionPackages.map(({ subscriptionPackage, price, priceID }) => (
+                            <div key={priceID} className="w-full bg-[#fff] rounded-[10px] shadow-[0px 1px 2px #E1E3E5] border border-[#E1E3E5] divide-y">
                                 <div className="pt-[15px] px-[25px] pb-[25px]">
                                     <div className="flex justify-end">
                                         <div className="bg-[#F6F6F7] rounded-[20px] flex justify-center align-center px-[12px]">
@@ -83,10 +115,10 @@ const ProductDisplay = ({customerId}) => {
                                 </div>
 
                                 <div className="pt-[25px] px-[25px] pb-[35px]">
-                                        <div className="mt-[25px]">
-                                            <input type="hidden" name="lookup_key" />
-                                            <button className="bg-[#006EF5] rounded-[5px] py-[15px] px-[25px] text-[#fff] text-[14px] leading-[17px] font-semibold"  id={priceId} type="button" onClick={createSubscription}>Choose Plan</button>
-                                        </div>
+                                    <div className="mt-[25px]">
+                                        <input type="hidden" name="lookup_key" />
+                                        <button className="bg-[#006EF5] rounded-[5px] py-[15px] px-[25px] text-[#fff] text-[14px] leading-[17px] font-semibold" id={priceID} type="button" onClick={() => { createSubscription(priceID) }}>Choose Plan</button>
+                                    </div>
                                 </div>
                             </div>
 

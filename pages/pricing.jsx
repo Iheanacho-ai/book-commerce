@@ -1,87 +1,94 @@
-import ProductDisplay from "../components/product-display"
+import ProductDisplay from "../components/product-display";
 import { Stripe } from 'stripe';
-import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import { useEffect, useState } from "react";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+const Pricing = ({ email }) => {
+  const [customerID, setCustomerID] = useState()
 
-const Pricing = ({customerId}) => {
-  console.log(customerId, 'Customerid Pricing')
-  return(
+  const createStripeCustomer = async () => {
+    let findCustomer
+    //check if customer already exists
+    try {
+      const res = await fetch('/api/search-customer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email
+        })
+      })
+      
+    
+      const searchedCustomer = await res.json();
+      findCustomer = searchedCustomer.checkCustomer.data
+      console.log('findCustomer', findCustomer)
+    } catch (error) {
+      console.log(error)
+    }
+
+    //saves the customer ID if the customer exists
+    if (findCustomer.length !== 0) {
+      setCustomerID(findCustomer[0].id)
+      console.log('customer ID first', findCustomer[0].id)
+    } else {
+      // if the customer does not exist create customer
+      try {
+        const res = await fetch('/api/create-customer', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email
+          })
+        })
+
+        const newCustomer = await res.json();
+        setCustomerID(newCustomer.customer.id)
+        console.log('customer ID second', newCustomer.customer.id)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  }
+
+  useEffect(() => {
+   //create new customer when the page loads
+    createStripeCustomer()
+  }, [])
+
+
+  return (
     <div>
-      <ProductDisplay customerId={customerId}/>
+      <ProductDisplay customerID={customerID} />
     </div>
   )
 }
 
 export const getServerSideProps = async (ctx) => {
-  //create customer variable
-  let customerId
   // Create authenticated Supabase Client
   const supabase = createServerSupabaseClient(ctx)
   // get the user session from supabase
   const { data: { session }, } = await supabase.auth.getSession()
+  console.log(session)
   //get the user email from the session
   const email = session.user.email
 
-
-  //create stripe customer
-  const createCustomer = async () => {
-    let createdCustomer;
-    let customerAvailable;
-    
-    try {
-      const checkCustomer = await stripe.customers.search({
-        query: `email: '${email}'`
-      })  
-      
-      createdCustomer = JSON.parse(JSON.stringify(checkCustomer))
-      customerAvailable = createdCustomer.data
-      
-    } catch (error) {
-      console.log(error)
-      
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/signin',
+        permanent: false,
+      },
     }
-    
-    if (customerAvailable.length) {
-      customerId = createdCustomer.data[0].id
-    } else {
-        try {
-          const res = await fetch('/api/create-customer', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email
-            })
-          }) 
-
-          const newCustomer = await res.json();
-          customerId = newCustomer.customer.id
-
-        } catch (error) {
-          console.log(error) 
-        }
-      }
-
   }
-
-  if (session) {
-    createCustomer()
-      
-  } else {
-      return{
-        redirect: {
-            destination: '/signin',
-            permanent: false,
-        }
-      }
-    }
 
   return {
     props: {
-      customerId
-    },
+      email
+    }
   }
 }
 

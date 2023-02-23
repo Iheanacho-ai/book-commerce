@@ -7,10 +7,16 @@ import { useState } from 'react'
 const AccountPage = ({user}) => {
     const supabaseClient = useSupabaseClient()
     const router = useRouter()
-    const [subscriptionId, setSubscriptionId] = useState() 
     
 
     const cancelSubscription = async () => {
+        const { data, error } = await supabase
+            .from('stripe_data')
+            .select()
+      
+        if (error) {
+          console.log(error)
+        }
         try {
             await fetch('/api/cancel-subscription', {
                 method: 'POST',
@@ -18,7 +24,7 @@ const AccountPage = ({user}) => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                   subscriptionId
+                   subscriptionId: data.subscriptionId
                 })
             }) 
         } catch (error) {
