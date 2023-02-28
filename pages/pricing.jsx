@@ -1,6 +1,7 @@
 import ProductDisplay from "../components/product-display";
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 import { useEffect, useState } from "react";
+import { server } from '../config';
 
 const Pricing = ({ email}) => {
   const [customerID, setCustomerID] = useState()
@@ -76,7 +77,7 @@ export const getServerSideProps = async (ctx) => {
 
   //check if there is an active subscription
 
-  const res = await fetch('http://localhost:3000/api/search-subscriptions', {
+  const res = await fetch(`${server}/api/search-subscriptions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
