@@ -82,7 +82,7 @@ const ProductDisplay = ({ customerID }) => {
 
 
     return (
-        <div className='flex min-h-screen pt-[30px] px-[40px]'>
+        <div className='flex pt-[30px] px-[40px]'>
             <div className="min-w-full">
                 <p className="text-[#00153B] text-[20px] leading-[40px] font-semibold">
                     Your Subscription

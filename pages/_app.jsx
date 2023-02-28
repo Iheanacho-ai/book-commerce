@@ -16,7 +16,9 @@ export default function App({ Component, pageProps }) {
     >
       <div>
         <NavBar/>
-        <Component {...pageProps} />
+        <div className= 'bookify-body'>
+          <Component {...pageProps} />
+        </div>
         <Footer/>
       </div>
     </SessionContextProvider>

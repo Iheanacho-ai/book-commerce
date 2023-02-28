@@ -11,9 +11,6 @@ import {
 const CheckoutForm = ({stripe, clientSecret}) => {
   stripe = useStripe();
   const elements = useElements();
-
-  
-
   const [name, setName] = useState()
 
   const handleSubmit = async (event) => {

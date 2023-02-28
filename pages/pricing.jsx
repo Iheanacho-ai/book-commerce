@@ -1,11 +1,9 @@
 import ProductDisplay from "../components/product-display";
-import { Stripe } from 'stripe';
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 import { useEffect, useState } from "react";
 
-const Pricing = ({ email }) => {
+const Pricing = ({ email}) => {
   const [customerID, setCustomerID] = useState()
-
   const createStripeCustomer = async () => {
     let findCustomer
     //check if customer already exists
@@ -23,7 +21,6 @@ const Pricing = ({ email }) => {
     
       const searchedCustomer = await res.json();
       findCustomer = searchedCustomer.checkCustomer.data
-      console.log('findCustomer', findCustomer)
     } catch (error) {
       console.log(error)
     }
@@ -31,7 +28,6 @@ const Pricing = ({ email }) => {
     //saves the customer ID if the customer exists
     if (findCustomer.length !== 0) {
       setCustomerID(findCustomer[0].id)
-      console.log('customer ID first', findCustomer[0].id)
     } else {
       // if the customer does not exist create customer
       try {
@@ -47,7 +43,6 @@ const Pricing = ({ email }) => {
 
         const newCustomer = await res.json();
         setCustomerID(newCustomer.customer.id)
-        console.log('customer ID second', newCustomer.customer.id)
       } catch (error) {
         console.log(error)
       }
@@ -72,22 +67,53 @@ export const getServerSideProps = async (ctx) => {
   const supabase = createServerSupabaseClient(ctx)
   // get the user session from supabase
   const { data: { session }, } = await supabase.auth.getSession()
-  console.log(session)
   //get the user email from the session
-  const email = session.user.email
+  let email
+
+  if(session){
+    email = session.user.email
+  }
+
+  //check if there is an active subscription
+
+  const res = await fetch('http://localhost:3000/api/search-subscriptions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email
+    })
+  })
+  
+
+  const searchedSubscriptions = await res.json();
+  const emailSubscription = searchedSubscriptions.subscription.data
 
   if (!session) {
+    // if there is no active user session, redirect to the signin page
     return {
       redirect: {
         destination: '/signin',
         permanent: false,
       },
     }
+  }else if(emailSubscription){
+    // if there is an active user session and an active subscription redirect to the catalog page
+    return {
+      redirect: {
+        destination: '/catalog-page',
+        permanent: false,
+      },
+    }
+
   }
+
 
   return {
     props: {
-      email
+      email,
+      emailSubscription
     }
   }
 }

@@ -26,7 +26,7 @@ const LoginPage = () => {
       <div className="auth w-full flex justify-center">
         <div className="justify-center  h-[65vh] mt-11 w-96">
           <Auth
-            redirectTo='https://book-commerce-ajgl.vercel.app/catalog-page'
+            redirectTo='http://localhost:3000/pricing'
             appearance={{ theme: ThemeSupa }}
             supabaseClient={supabaseClient}
             providers={['google']}
