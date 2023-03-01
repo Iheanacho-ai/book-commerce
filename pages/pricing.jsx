@@ -77,19 +77,19 @@ export const getServerSideProps = async (ctx) => {
 
   //check if there is an active subscription
 
-  // const res = await fetch(`${server}/api/search-subscriptions`, {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     email
-  //   })
-  // })
+  const res = await fetch(`${server}/api/search-subscriptions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email
+    })
+  })
   
 
-  // const searchedSubscriptions = await res.json();
-  // const emailSubscription = searchedSubscriptions.subscription.data
+  const searchedSubscriptions = await res.json();
+  const emailSubscription = searchedSubscriptions.subscription.data
 
   if (!session) {
     // if there is no active user session, redirect to the signin page
@@ -99,17 +99,16 @@ export const getServerSideProps = async (ctx) => {
         permanent: false,
       },
     }
-  }
-  // else if(emailSubscription){
-  //   // if there is an active user session and an active subscription redirect to the catalog page
-  //   return {
-  //     redirect: {
-  //       destination: '/catalog-page',
-  //       permanent: false,
-  //     },
-  //   }
+  }else if(emailSubscription){
+    // if there is an active user session and an active subscription redirect to the catalog page
+    return {
+      redirect: {
+        destination: '/catalog-page',
+        permanent: false,
+      },
+    }
 
-  // }
+  }
 
 
   return {
