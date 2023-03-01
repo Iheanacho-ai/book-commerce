@@ -24,18 +24,15 @@ const ProductDisplay = ({ customerID }) => {
     const router = useRouter()
     const [subscriptionId, setSubscriptionId] = useState()
     const [clientSecret, setClientSecret] = useState()
-    const [supabaseId, setSupabaseId] = useState(1)
 
     const addIdToStripe = async () => {
         if(subscriptionId && clientSecret){
-            //check if the data has an id of 1 already
-
             const {data, error} = await supabase
                 .from('stripe_data')
                 .select()
 
-                if(data.length){
-                    // if the data with this id exists already add 1 to the exisiting id
+                if(!error){
+                    // create a new data ID using the length of the data array
                     const id = data.length + 1
 
                     //insert a new data row with the new Id
@@ -60,37 +57,11 @@ const ProductDisplay = ({ customerID }) => {
                         router.push('/payment') 
                     }
 
-                }else{
-                    //if there is no exisitng data with that id, create a new one
-                    const {error} = await supabase
-                    .from()
-                    .insert(
-                        {
-                            id: supabaseId,
-                            subscriptionId: subscriptionId,
-                            clientSecret: clientSecret
-
-                        }
-                    )
-                    
-                    //  console any error encountered during saving it
-                    if(error){
-                        console.log('error creating stripe data', error)
-                    }else{
-                        // if no error is encountered route to the payment page
-                        alert('yeah')
-                        router.push('/payment') 
-                    }
                 }
-            //     
-            if(error){
-                console.log('error collecting data', error)
-            }   
-
-
-
+                else{
+                    console.log('error retrieving data', error)
+                }   
             
-
         }
 
     }
@@ -124,6 +95,46 @@ const ProductDisplay = ({ customerID }) => {
             console.log(error)
         }
     }
+
+
+    // find if the customer has created an exiting subscription already
+    const findExisitingSubcriptions = async () => {
+        //retreive all the subscriptions on the stripe database
+        try {
+          const res = await fetch('/api/search-subscriptions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          })
+          const ListedSubscriptions = await res.json();
+          if(ListedSusbcriptions){
+            // filter through the subscriptions using the customer ID
+            const filteredSubscription = ListedSubscriptions.data.filter(subscription => {
+                return subscription.customer === customerID
+              })
+    
+              if(filteredSubscription.status === "incomplete"){
+                // if the subscription status is incomplete route to the payment to finish up the subscription
+                router.push('/payment')
+              }else if(filteredSubscription.status === "active"){
+                // if the subscription status is active, route to the catalog page
+                router.push('/catalog-page')
+              }
+            console.log(ListedSubscriptions)
+          }else{
+            return
+          }
+          
+        } catch (error) {
+          console.log('error retrieving the subscriptions', error)
+          
+        }
+    }
+
+    useEffect(()=> {
+        findExisitingSubcriptions()
+    }, [])
 
 
     return (

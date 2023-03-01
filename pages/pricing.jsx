@@ -50,9 +50,26 @@ const Pricing = ({ email}) => {
     }
   }
 
+  const findExisitingSubcriptions = async () => {
+    try {
+      const res = await fetch('/api/search-subscriptions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      const ListedSubscriptions = await res.json();
+      console.log(ListedSubscriptions)
+    } catch (error) {
+      console.log(error)
+      
+    }
+  }
+
   useEffect(() => {
    //create new customer when the page loads
     createStripeCustomer()
+    findExisitingSubcriptions()
   }, [])
 
 
@@ -75,24 +92,6 @@ export const getServerSideProps = async (ctx) => {
     email = session.user.email
   }
 
-  console.log('session', session)
-  console.log('email', email)
-
-  //check if there is an active subscription
-
-  // const res = await fetch(`${server}/api/search-subscriptions`, {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     email
-  //   })
-  // })
-  
-
-  // const searchedSubscriptions = await res.json();
-  // const emailSubscription= searchedSubscriptions.subscription.data
 
   if (!session) {
     // if there is no active user session, redirect to the signin page

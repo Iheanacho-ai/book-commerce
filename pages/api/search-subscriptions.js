@@ -3,18 +3,16 @@ import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const handler = async (req, res) => {
-    const {email} = req.body
-  //check if customer already exists
+  //gather all the subscriptions created on the database
   try {
-    const subscription = await stripe.subscriptions.search({
-        query: `status:'active' AND metadata['email']:'${email}'`,
+    const subscriptionList = await stripe.subscriptions.list({
+      limit: 3,
     });
     res.status(200).json({
       code: 'search_done',
-      subscription
+      subscriptionList
     })
     
-    console.log(subscription, 'subscription backend')
     }catch (error) {
       console.log(error);
       res.status(400).json({
