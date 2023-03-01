@@ -41,7 +41,7 @@ const AccountPage = ({user}) => {
     
     return(
         <div className="account-page w-full flex justify-center">
-            <div className="overflow-hidden bg-white shadow sm:rounded-lg w-3/5">
+            <div className="overflow-hidden bg-white shadow sm:rounded-lg w-4/5 lg:w-3/5">
                 <div className="px-4 py-5 sm:px-6">
                     <h3 className="text-lg font-medium leading-6 text-gray-900">User Information</h3>
                 </div>

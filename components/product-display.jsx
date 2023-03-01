@@ -150,10 +150,10 @@ const ProductDisplay = ({ customerID }) => {
                     </p>
                 </div>
 
-                <div className="mt-[20px] grid grid-cols-3 gap-[20px]">
+                <div className="mt-[20px] display:block lg:grid grid-cols-3 gap-[20px]">
                     {
                         subscriptionPackages.map(({ subscriptionPackage, price, priceID }) => (
-                            <div key={priceID} className="w-full bg-[#fff] rounded-[10px] shadow-[0px 1px 2px #E1E3E5] border border-[#E1E3E5] divide-y">
+                            <div key={priceID} className="mt-5 w-full bg-[#fff] rounded-[10px] shadow-[0px 1px 2px #E1E3E5] border border-[#E1E3E5] divide-y">
                                 <div className="pt-[15px] px-[25px] pb-[25px]">
                                     <div className="flex justify-end">
                                         <div className="bg-[#F6F6F7] rounded-[20px] flex justify-center align-center px-[12px]">
