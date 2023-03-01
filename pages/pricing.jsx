@@ -89,7 +89,7 @@ export const getServerSideProps = async (ctx) => {
   
 
   const searchedSubscriptions = await res.json();
-  const emailSubscription = searchedSubscriptions.subscription.data
+  const emailSubscription= searchedSubscriptions.subscription.data
 
   if (!session) {
     // if there is no active user session, redirect to the signin page
@@ -98,18 +98,9 @@ export const getServerSideProps = async (ctx) => {
         destination: '/signin',
         permanent: false,
       },
-    }
-  }else if(emailSubscription){
-    // if there is an active user session and an active subscription redirect to the catalog page
-    return {
-      redirect: {
-        destination: '/catalog-page',
-        permanent: false,
-      },
-    }
-
+    } 
   }
-
+ 
 
   return {
     props: {

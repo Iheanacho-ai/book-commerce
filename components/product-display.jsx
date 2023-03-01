@@ -1,6 +1,6 @@
 import { supabase } from '../utils/index';
 import { useRouter } from 'next/router'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const subscriptionPackages = [
     {
@@ -22,30 +22,74 @@ const subscriptionPackages = [
 
 const ProductDisplay = ({ customerID }) => {
     const router = useRouter()
-    console.log('product display ID', customerID)
     const [subscriptionId, setSubscriptionId] = useState()
     const [clientSecret, setClientSecret] = useState()
+    const [supabaseId, setSupabaseId] = useState(1)
 
     const addIdToStripe = async () => {
         if(subscriptionId && clientSecret){
-            const { error } = await supabase
+            //check if the data has an id of 1 already
+
+            const {data, error} = await supabase
                 .from('stripe_data')
-                .insert(
-                    {
-                        id: 1,
-                        subscriptionId: subscriptionId,
-                        clientSecret: clientSecret
+                .select()
+
+                if(data.length){
+                    // if the data with this id exists already add 1 to the exisiting id
+                    const id = data.length + 1
+
+                    //insert a new data row with the new Id
+                    const { error } = await supabase
+                    .from('stripe_data')
+                    .insert(
+                        {
+                            id: id,
+                            subscriptionId: subscriptionId,
+                            clientSecret: clientSecret
+                        }
+        
+        
+                    )
+
+                    // console any error encountered during the addition
+                    if(error){
+                        console.log('error saving information to the database', error)
+                    }else{
+                        // if there is no error route to the payment page to collect user information
+                        alert('yeah')
+                        router.push('/payment') 
                     }
-    
-    
-                )
 
+                }else{
+                    //if there is no exisitng data with that id, create a new one
+                    const {error} = await supabase
+                    .from()
+                    .insert(
+                        {
+                            id: supabaseId,
+                            subscriptionId: subscriptionId,
+                            clientSecret: clientSecret
 
+                        }
+                    )
+                    
+                    //  console any error encountered during saving it
+                    if(error){
+                        console.log('error creating stripe data', error)
+                    }else{
+                        // if no error is encountered route to the payment page
+                        alert('yeah')
+                        router.push('/payment') 
+                    }
+                }
+            //     
             if(error){
-                console.log(error)
-            }else{
-               router.push('/payment') 
-            }
+                console.log('error collecting data', error)
+            }   
+
+
+
+            
 
         }
 
@@ -76,6 +120,7 @@ const ProductDisplay = ({ customerID }) => {
 
 
         } catch (error) {
+            // console any error encountered during gathering of the data
             console.log(error)
         }
     }
