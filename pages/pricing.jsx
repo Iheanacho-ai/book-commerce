@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 import { useEffect, useState } from "react";
 import { server } from '../config';
 
-const Pricing = ({ email}) => {
+const Pricing = ({ email}) => { 
   const [customerID, setCustomerID] = useState()
   const createStripeCustomer = async () => {
     let findCustomer
