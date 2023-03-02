@@ -20,8 +20,6 @@ export const getServerSideProps = async (ctx) => {
     
     if (error) {
       console.log(error)
-    }else{
-      console.log(data)
     }
   
     return {

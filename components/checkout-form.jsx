@@ -30,6 +30,8 @@ const CheckoutForm = ({stripe, clientSecret}) => {
             },
         }
     });
+
+    
     if(error){
         console.log(error)
     }else{
@@ -40,6 +42,7 @@ const CheckoutForm = ({stripe, clientSecret}) => {
   return (
     <section className="abg-gray-100 text-gray-600 min-h-3/4 p-4">
         <PaymentSuccess open= {open} setOpen= {setOpen}/>
+        <h2>hey</h2>
         <div className="h-full">
             <form onSubmit={handleSubmit}>
                 <div className="relative px-4 sm:px-6 lg:px-8 pb-8 max-w-lg mx-auto" x-data="{ card: true }">

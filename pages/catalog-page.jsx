@@ -16,7 +16,6 @@ const CatalogPage = () => {
             if(searchName.length > 0){
                 const smallSearchName = searchName.toLowerCase()
                const filteredBooks =  products.filter(item=> item.name.toLocaleLowerCase() === smallSearchName)
-               console.log(filteredBooks)
                setFilteredBooksArray(filteredBooks)
                router.push(`#${searchName}`);
 

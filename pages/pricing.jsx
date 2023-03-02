@@ -3,81 +3,8 @@ import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 import { useEffect, useState } from "react";
 import { server } from '../config';
 
-const Pricing = ({ email}) => { 
-  const [customerID, setCustomerID] = useState()
-  const createStripeCustomer = async () => {
-    let findCustomer
-    //check if customer already exists
-    try {
-      const res = await fetch('/api/search-customer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
-
-        },
-        body: JSON.stringify({
-          email
-        })
-      })
-      
-    
-      const searchedCustomer = await res.json();
-      findCustomer = searchedCustomer.checkCustomer.data
-      console.log('find customer', findCustomer)
-    } catch (error) {
-      console.log(error)
-    }
-
-    //saves the customer ID if the customer exists
-    if (findCustomer.length !== 0) {
-      setCustomerID(findCustomer[0].id)
-    } else {
-      // if the customer does not exist create customer
-      try {
-        const res = await fetch('/api/create-customer', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
-          },
-          body: JSON.stringify({
-            email
-          })
-        })
-
-        const newCustomer = await res.json();
-        setCustomerID(newCustomer.customer.id)
-      } catch (error) {
-        console.log(error)
-      }
-    }
-  }
-
-  const findExisitingSubcriptions = async () => {
-    try {
-      const res = await fetch('/api/search-subscriptions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
-        }
-      })
-      const ListedSubscriptions = await res.json();
-      console.log(ListedSubscriptions)
-    } catch (error) {
-      console.log(error)
-      
-    }
-  }
-
-  useEffect(() => {
-   //create new customer when the page loads
-    createStripeCustomer()
-    findExisitingSubcriptions()
-  }, [])
-
-
+const Pricing = ({ email, customerID}) => { 
+  console.log('customer ID pricing', customerID)
   return (
     <div>
       <ProductDisplay customerID={customerID} />
@@ -97,6 +24,61 @@ export const getServerSideProps = async (ctx) => {
     email = session.user.email
   }
 
+  // let customerID
+
+  const createCustomerID = async () => {
+    let findCustomer
+    //check if customer already exists
+    try {
+      const res = await fetch(`${server}/api/search-customer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
+
+        },
+        body: JSON.stringify({
+          email
+        })
+      })
+      
+    
+      const searchedCustomer = await res.json();
+      findCustomer = searchedCustomer.checkCustomer.data
+    } catch (error) {
+      console.log(error)
+    }
+
+    //saves the customer ID if the customer exists
+    if (findCustomer.length !== 0) {
+      return findCustomer[0].id
+    } else {
+      // if the customer does not exist create customer
+      try {
+        const res = await fetch(`${server}/api/create-customer`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
+          },
+          body: JSON.stringify({
+            email
+          })
+        })
+
+        const newCustomer = await res.json();
+        return newCustomer.customer.id
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  }
+
+
+  const customerID = await createCustomerID()
+
+
+
 
   if (!session) {
     // if there is no active user session, redirect to the signin page
@@ -108,10 +90,12 @@ export const getServerSideProps = async (ctx) => {
     } 
   }
  
+  console.log('custommerID', customerID)
 
   return {
     props: {
-      email
+      email,
+      customerID
     }
   }
 }
