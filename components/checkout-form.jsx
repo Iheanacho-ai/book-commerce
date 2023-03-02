@@ -13,7 +13,7 @@ const CheckoutForm = ({stripe, clientSecret}) => {
   stripe = useStripe();
   const elements = useElements();
   const [name, setName] = useState()
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
 
   const handleSubmit = async (event) => {
     event.preventDefault();
