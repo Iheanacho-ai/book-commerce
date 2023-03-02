@@ -13,6 +13,8 @@ const Pricing = ({ email}) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
+
         },
         body: JSON.stringify({
           email
@@ -22,6 +24,7 @@ const Pricing = ({ email}) => {
     
       const searchedCustomer = await res.json();
       findCustomer = searchedCustomer.checkCustomer.data
+      console.log('find customer', findCustomer)
     } catch (error) {
       console.log(error)
     }
@@ -36,6 +39,7 @@ const Pricing = ({ email}) => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
           },
           body: JSON.stringify({
             email
@@ -56,6 +60,7 @@ const Pricing = ({ email}) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
         }
       })
       const ListedSubscriptions = await res.json();

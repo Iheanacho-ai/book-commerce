@@ -73,6 +73,7 @@ const ProductDisplay = ({ customerID }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
                 },
                 body: JSON.stringify({
                     priceID,
@@ -105,6 +106,7 @@ const ProductDisplay = ({ customerID }) => {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
             }
           })
           const ListedSubscriptions = await res.json();

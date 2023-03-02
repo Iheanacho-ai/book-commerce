@@ -22,6 +22,7 @@ const AccountPage = ({user}) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
                 },
                 body: JSON.stringify({
                    subscriptionId: data.subscriptionId
@@ -86,6 +87,8 @@ export const getServerSideProps = async (ctx) => {
     const {
       data: { session },
     } = await supabase.auth.getSession()
+
+    // collect the subscription of a user 
   
     if (!session)
       return {

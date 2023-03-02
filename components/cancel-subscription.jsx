@@ -9,6 +9,7 @@ const CancelSubscriptionButton = () => {
                 method: 'post',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
                 },
                 body: JSON.stringify({
                     subscriptionId: subscriptionId,

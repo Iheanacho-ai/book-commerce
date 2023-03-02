@@ -16,7 +16,7 @@ const handler = async (req, res) => {
     }catch (error) {
       console.log(error);
       res.status(400).json({
-        code: 'customer_check_failed',
+        code: 'subscription_check_failed',
         error: error
       })
   }
