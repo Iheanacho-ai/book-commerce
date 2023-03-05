@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import {supabase} from '../utils/index';
+import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { FaWindowClose } from "react-icons/fa";
 
-const Bag = () => {
+const Bag = ({session}) => {
   const [orderTotal, setOrderTotal] = useState()
   const [cartData, setCartData] = useState()
+  const user = useUser()
+  const supabaseClient = useSupabaseClient()
   
   const sumOfOrder = () => {
     if (cartData) {
@@ -20,15 +22,22 @@ const Bag = () => {
   }
 
   const retrieveCartData = async () => {
-    const { data, error } = await supabase
-      .from('cartItems')
-      .select()
-    
-      if (error) {
-        console.log(error)
-      } else {
-        setCartData(data) 
-      }
+    if(user){
+      console.log(user)
+      const { data, error } = await supabaseClient
+        .from('cartItems')
+        .select('*')
+        console.log(data, 'data from the order')
+      
+        if (error) {
+          console.log(error)
+        } else {
+          setCartData(data) 
+        }
+
+      console.log('order of the user', data)
+
+    }
   }
 
   useEffect(()=> {
@@ -37,7 +46,7 @@ const Bag = () => {
   }, [])
 
   const deleteData = async (id) => {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('cartItems')
       .delete()
       .eq('id', id)
@@ -163,6 +172,7 @@ const Bag = () => {
     </div>
   )
 }
+
 
 
 export default Bag;

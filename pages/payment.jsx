@@ -1,7 +1,7 @@
 import {loadStripe} from '@stripe/stripe-js';
 import {Elements} from '@stripe/react-stripe-js';
-import { supabase } from '../utils/index';
 import CheckoutForm from '../components/checkout-form';
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
@@ -13,11 +13,26 @@ const Payment = ({clientSecret}) => {
 };
 
 export const getServerSideProps = async (ctx) => {
-  // get the client secret from the supabase database
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx)
+  // Check if we have a session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+    if (!session)
+      return {
+        redirect: {
+          destination: '/signin',
+          permanent: false,
+        },
+    }
+
+     // get the client secret from the supabase database
     const { data, error } = await supabase
-    .from('stripe_data')
-    .select()
-    
+      .from('stripe_data')
+      .select()
+     
     if (error) {
       console.log(error)
     }

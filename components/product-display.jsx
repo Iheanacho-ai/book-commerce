@@ -1,6 +1,6 @@
-import { supabase } from '../utils/index';
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react';
+import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
 
 const subscriptionPackages = [
     {
@@ -26,43 +26,53 @@ const subscriptionPackages = [
 const ProductDisplay = ({ customerID }) => {
     const router = useRouter()
     const [overlay, setOverlay] = useState(false)
+    const user = useUser()
+    const supabaseClient = useSupabaseClient()
 
     const addIdToStripe = async (subscriptionId, clientSecret) => {
-        if(subscriptionId && clientSecret){
-            const {data, error} = await supabase
-                .from('stripe_data')
-                .select()
-
-                if(!error){
-                    // create a new data ID using the length of the data array
-                    const id = data.length + 1
-
-                    //insert a new data row with the new Id
-                    const { error } = await supabase
+        if(user){
+            console.log(user, 'user product display')
+            if(subscriptionId && clientSecret){
+                // retrieve the data on the database to create ids 
+                const {data, error} = await supabaseClient
                     .from('stripe_data')
-                    .insert(
-                        {
-                            id: id,
-                            subscriptionId: subscriptionId,
-                            clientSecret: clientSecret
-                        }
-        
-        
-                    )
+                    .select('*')
 
-                    // console any error encountered during the addition
-                    if(error){
-                        console.log('error saving information to the database', error)
-                    }else{
-                        // if there is no error route to the payment page to collect user information
-                        router.push('/payment') 
-                    }
-
-                }
-                else{
-                    console.log('error retrieving data', error)
-                }   
+                    console.log(data,'data getting saved' )
+    
+                    if(!error){
+                        // create a new data ID using the length of the data array
+                        const id = data.length + 1
+                        console.log(id, 'id of data getting saved')
+    
+                        //insert a new data row with the new Id
+                        const { error } = await supabaseClient
+                        .from('stripe_data')
+                        .insert(
+                            {
+                                id,
+                                subscriptionId: subscriptionId,
+                                clientSecret: clientSecret
+                            }
             
+            
+                        )
+    
+                        // console any error encountered during the addition
+                        if(error){
+                            console.log('error saving information to the database', error)
+                        }else{
+                            // if there is no error route to the payment page to collect user information
+                            router.push('/payment') 
+                        }
+    
+                    }
+                    else{
+                        console.log('error retrieving data', error)
+                    }   
+                
+            }
+
         }
 
     }
@@ -90,8 +100,6 @@ const ProductDisplay = ({ customerID }) => {
 
             const newSubscription = await subscriptionDetails.json();
             const {subscriptionId, clientSecret} = newSubscription
-            // setSubscriptionId(subscriptionId)
-            // setClientSecret(clientSecret)
 
             // add the subscriptionId and Client secret data from stripe to supabase
             

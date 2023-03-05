@@ -30,4 +30,4 @@ const CancelSubscriptionButton = () => {
     )
 }
 
-export default CancelSubscription
+export default CancelSubscriptionButton

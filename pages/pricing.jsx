@@ -1,6 +1,5 @@
 import ProductDisplay from "../components/product-display";
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
-import { useEffect, useState } from "react";
 import { server } from '../config';
 
 const Pricing = ({ email, customerID}) => { 

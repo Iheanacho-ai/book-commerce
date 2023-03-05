@@ -4,12 +4,14 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
 import Counter from './counter'
 import { useRouter } from 'next/router'
-import { supabase } from '../utils/index';
+import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
 
 
-const ProductPage = ({ widgetProduct, open, setOpen }) => {
+const ProductPage = ({ widgetProduct, open, setOpen}) => {
   const router = useRouter()
   const [counter, setCounter] = useState(0)
+  const user = useUser()
+  const supabaseClient = useSupabaseClient()
 
   const backToCatalogPage = () => {
     setOpen(false);
@@ -23,58 +25,66 @@ const ProductPage = ({ widgetProduct, open, setOpen }) => {
       if (counter > 0) {
         const { name, price, imageSrc, imageAlt, id } = widgetProduct[0]
 
-        //check if the object exists already on our database using the ID
-        const { data, error } = await supabase
-          .from('cartItems')
-          .select()
-          .eq('id', id)
-
-        if (data.length) {
-          // if data exists get its quantity and add it to new quantity
-          const newQuantity = data[0].quantity + counter
-
-          //update the cart item on the database
-
-          const { error } = await supabase
+        if(user){
+          console.log(user)
+          //check if the object exists already on our database using the ID
+          const { data, error } = await supabaseClient
             .from('cartItems')
-            .update({ quantity: newQuantity })
+            .select()
             .eq('id', id)
-
-          if (error) {
-            // console any error we encounter along the way
-            console.log(error)
-            alert('Error adding the item to your wishlist')
-          } else {
-            // alert that we have added to our wishlist successfully
-
-            alert('item added successfully to wishlist')
-          }
-
-        } else {
-          // add a new item if the item is not available on our database
-          const { error } = await supabase
-            .from('cartItems')
-            .insert(
-              {
-                id,
-                name,
-                price,
-                image_src: imageSrc,
-                image_alt: imageAlt,
-                quantity: counter
+  
+            if (data.length > 0) {
+              // if data exists get its quantity and add it to new quantity
+              const newQuantity = data[0].quantity + counter
+  
+              //update the cart item on the database
+  
+              const { error } = await supabaseClient
+                .from('cartItems')
+                .update({ quantity: newQuantity })
+                .eq('id', id)
+  
+                if (error) {
+                  // console any error we encounter along the way
+                  console.log(error)
+                  alert('Error adding the item to your wishlist')
+                } else {
+                  // alert that we have added to our wishlist successfully
+    
+                  alert('item added successfully to wishlist')
+                }
+  
+            } else {
+              // add a new item if the item is not available on our database
+              const { error } = await supabaseClient
+                .from('cartItems')
+                .insert(
+                  {
+                    id,
+                    name,
+                    price,
+                    image_src: imageSrc,
+                    image_alt: imageAlt,
+                    quantity: counter
+                  }
+                )
+  
+              if (error) {
+                // console any error encountered
+  
+                console.log(error)
+                alert('Error adding the item to your wishlist, 2nd part')
+              } else {
+                alert('item added to Wishlist')
               }
-            )
-
-          if (error) {
-            // console any error encountered
-
-            console.log(error)
-            alert('Error adding the item to your wishlist')
-          } else {
-            alert('item added to Wishlist')
+  
+            }
+          if(error){
+            console.log(error, 'error checking if the cart item data exists already')
           }
 
         }
+
       } else {
         alert("Quantity must be greater than 0")
       }

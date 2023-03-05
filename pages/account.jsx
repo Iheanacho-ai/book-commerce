@@ -1,7 +1,6 @@
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
 
 
 const AccountPage = ({user}) => {
@@ -10,9 +9,9 @@ const AccountPage = ({user}) => {
     
 
     const cancelSubscription = async () => {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('stripe_data')
-            .select()
+            .select('*')
       
         if (error) {
           console.log(error)
@@ -96,7 +95,7 @@ export const getServerSideProps = async (ctx) => {
           destination: '/',
           permanent: false,
         },
-      }
+    }
   
     return {
       props: {
