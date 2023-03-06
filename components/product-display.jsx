@@ -36,31 +36,48 @@ const ProductDisplay = ({ customerID }) => {
                 const {data, error} = await supabaseClient
                     .from('stripeData')
                     .select('*')
+
+                    console.log(data, 'yeah yeah')
+
     
-                    if(!error){
-                        // create a new data ID using the length of the data array
-                        const id = data.length + 1
-                        console.log(id, 'id of data getting saved')
-    
-                        //insert a new data row with the new Id
-                        const { error } = await supabaseClient
-                        .from('stripeData')
-                        .insert(
-                            {
-                                id,
-                                subscriptionId: subscriptionId,
-                                clientSecret: clientSecret
-                            }
-            
-            
-                        )
-    
-                        // console any error encountered during the addition
-                        if(error){
-                            console.log('error saving information to the database', error)
+                    if(!error){   
+                        if(data.length > 0){
+                            // if there is an exisiting stripe data update the data
+                            const { error } = await supabaseClient
+                                .from('stripeData')
+                                .update({subscriptionId, clientSecret})
+                                .eq('id', 1)
+                            
+                                if(error){
+                                    console.log('error creating updating stripe data database', error)
+                                }else{
+                                    // if there is no error route to the payment page to collect user information
+                                    router.push('/payment') 
+                                }
+
+                                
+
                         }else{
-                            // if there is no error route to the payment page to collect user information
-                            router.push('/payment') 
+                            alert('yeah')
+                            // if there is not an exisiting stripe data create a new one
+                            const { error } = await supabaseClient
+                                .from('stripeData')
+                                .insert(
+                                    {
+                                        id: 1,
+                                        subscriptionId: subscriptionId,
+                                        clientSecret: clientSecret
+                                    }
+                    
+                    
+                                )
+                            
+                            if(error){
+                                console.log('error creating a new stripe data on the database', error)
+                            }else{
+                                // if there is no error route to the payment page to collect user information
+                                router.push('/payment') 
+                            }
                         }
     
                     }
@@ -78,7 +95,6 @@ const ProductDisplay = ({ customerID }) => {
     }
 
     const createSubscription = async (priceID) => {
-
         // Change the button to Loading
         const UpdateLoading = subscriptionPackages.find((obj) => obj.priceID === priceID);
         UpdateLoading.loading = true

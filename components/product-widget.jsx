@@ -40,7 +40,7 @@ const ProductPage = ({ widgetProduct, open, setOpen, sessionid}) => {
 
             console.log('product widget', data)
   
-            if (data) {
+            if (data.length > 0) {
               // if data exists get its quantity and add it to new quantity
               const newQuantity = data[0].quantity + counter
   

@@ -48,8 +48,10 @@ export const getServerSideProps = async (ctx) => {
       console.log(error)
     }
 
+  
+
     //saves the customer ID if the customer exists
-    if (findCustomer.length !== 0) {
+    if (findCustomer) {
       return findCustomer[0].id
     } else {
       // if the customer does not exist create customer

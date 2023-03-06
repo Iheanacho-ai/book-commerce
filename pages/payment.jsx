@@ -31,8 +31,9 @@ export const getServerSideProps = async (ctx) => {
      // get the client secret from the supabase database
     const { data, error } = await supabase
       .from('stripeData')
-      .select()
-     
+      .select('*')
+    
+    console.log(data, 'payment')
     if (error) {
       console.log(error)
     }
