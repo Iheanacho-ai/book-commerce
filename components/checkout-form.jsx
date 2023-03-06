@@ -22,7 +22,7 @@ const CheckoutForm = ({stripe, clientSecret}) => {
       return;
     }
 
-    const {error} = await stripe.confirmCardPayment(clientSecret, {
+    const {paymentIntent, error} = await stripe.confirmCardPayment(clientSecret, {
         payment_method:{
             card: elements.getElement(CardElement),
             billing_details: {
@@ -30,13 +30,16 @@ const CheckoutForm = ({stripe, clientSecret}) => {
             },
         }
     });
+    
+
 
 
     if(error){
         console.log(error)
-        console.log(paymentIntent.status)
-    }else{
+    }else if(paymentIntent.status === 'succeeded'){
         setOpen(true)
+    }else{
+        console.log('Unexpected PaymentIntent status', paymentIntent.status)
     }
   }
 

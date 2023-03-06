@@ -79,7 +79,38 @@ export const getServerSideProps = async (ctx) => {
   const customerID = await createCustomerID()
 
 
+  // find if the customer has created an exiting subscription already
+  const findExisitingSubcriptions = async (customerID) => {
+    //retreive all the subscriptions on the stripe database
+    try {
+      const res = await fetch(`${server}/api/search-subscriptions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
+        }
+      })
+      const ListedSubscriptions = await res.json();
+      if(ListedSubscriptions.subscriptionList.data.length > 0){
+        // filter through the subscriptions using the customer ID
 
+        const filteredSubscription = ListedSubscriptions.subscriptionList.data.filter(subscription => {
+          return subscription.customer === customerID
+        })
+
+        return filteredSubscription[0].status
+        
+      }else{
+        return
+      }
+      
+    } catch (error) {
+      console.log('error retrieving the subscriptions', error)
+      
+    }
+  }
+
+  const status = await findExisitingSubcriptions(customerID)
 
   if (!session) {
     // if there is no active user session, redirect to the signin page
@@ -88,10 +119,17 @@ export const getServerSideProps = async (ctx) => {
         destination: '/signin',
         permanent: false,
       },
-    } 
+    }
+  } else if (status === 'active') {
+    // if user is authenticated and has an active subscription, redirect to the catalog page
+    return {
+      redirect: {
+        destination: '/catalog-page',
+        permanent: false,
+      },
+    }
   }
  
-  console.log('custommerID', customerID)
 
   return {
     props: {

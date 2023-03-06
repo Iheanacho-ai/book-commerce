@@ -129,48 +129,6 @@ const ProductDisplay = ({ customerID }) => {
     }
 
 
-    // find if the customer has created an exiting subscription already
-    const findExisitingSubcriptions = async () => {
-        //retreive all the subscriptions on the stripe database
-        try {
-          const res = await fetch('/api/search-subscriptions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
-            }
-          })
-          const ListedSubscriptions = await res.json();
-          if(ListedSubscriptions.subscriptionList){
-            // filter through the subscriptions using the customer ID
-
-            const filteredSubscription = ListedSubscriptions.subscriptionList.data.filter(subscription => {
-                return subscription.customer === customerID
-            })
-
-
-            const status = filteredSubscription[0].status
-    
-           if(status === "active"){
-                // if the subscription status is active, route to the catalog page
-                router.push('/catalog-page')
-            }
-            
-          }else{
-            return
-          }
-          
-        } catch (error) {
-          console.log('error retrieving the subscriptions', error)
-          
-        }
-    }
-
-    useEffect(()=> {
-        findExisitingSubcriptions()
-    }, [])
-
-
     return (
         <div className={`flex pt-[30px] px-[40px] ${overlay ? 'opacity-50' : ''}`}>
             <div className="min-w-full">
