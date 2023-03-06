@@ -34,6 +34,7 @@ const CheckoutForm = ({stripe, clientSecret}) => {
 
     if(error){
         console.log(error)
+        console.log(paymentIntent.status)
     }else{
         setOpen(true)
     }

@@ -1,10 +1,11 @@
 import {useState} from 'react';
 import ProductPage from "../components/product-widget";
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/router';
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 
-const CatalogPage = () => {
+const CatalogPage = ({sessionid}) => {
+    console.log('session id catalog page', sessionid)
     const router = useRouter()
-
     const [open, setOpen] = useState(false)
     const [widgetProduct, setWidgetProduct] = useState()
     const [searchName, setSearchName] = useState()
@@ -97,7 +98,7 @@ const CatalogPage = () => {
                             <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
                                 {
                                     filteredBooksArray.map((book) => (
-                                        <a key={book.id} id={book.id} href={`#${book.name}`} onClick={openProductPage} className="group">\
+                                        <a key={book.id} id={book.id} href={`#${book.name}`} onClick={openProductPage} sessionid={sessionid} className="group">\
                                             <ProductPage widgetProduct= {widgetProduct} open= {open} setOpen= {setOpen}/>
                                             <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-w-7 xl:aspect-h-8">
                                                 <img
@@ -116,7 +117,7 @@ const CatalogPage = () => {
                             <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
                                 {products.map((product) => (
                                     <a key={product.id} id={product.id} href={`#${product.name}`} onClick={openProductPage} className="group">
-                                        <ProductPage widgetProduct= {widgetProduct} open= {open} setOpen= {setOpen}/>
+                                        <ProductPage widgetProduct= {widgetProduct} open= {open} setOpen= {setOpen} sessionid={sessionid}/>
                                         <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-w-7 xl:aspect-h-8">
                                             <img
                                                 src={product.imageSrc}
@@ -138,6 +139,32 @@ const CatalogPage = () => {
             </div>
         </div>
     )
+}
+
+export const getServerSideProps = async (ctx) => {
+    // Create authenticated Supabase Client
+    const supabase = createServerSupabaseClient(ctx)
+    // Check if we have a session
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    console.log(session.user.id)
+    // collect the subscription of a user 
+  
+    if (!session)
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        },
+    }
+  
+    return {
+      props: {
+        sessionid: session.user.id,
+      },
+    }
 }
 
 export default CatalogPage;

@@ -7,7 +7,8 @@ import { useRouter } from 'next/router'
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
 
 
-const ProductPage = ({ widgetProduct, open, setOpen}) => {
+const ProductPage = ({ widgetProduct, open, setOpen, sessionid}) => {
+  console.log('sessionnId product widget', sessionid)
   const router = useRouter()
   const [counter, setCounter] = useState(0)
   const user = useUser()
@@ -24,6 +25,10 @@ const ProductPage = ({ widgetProduct, open, setOpen}) => {
 
       if (counter > 0) {
         const { name, price, imageSrc, imageAlt, id } = widgetProduct[0]
+        // create a special id for each product and user
+        const uniqueId = id
+        
+        console.log('uniqueID', uniqueId)
 
         if(user){
           console.log(user)
@@ -31,9 +36,11 @@ const ProductPage = ({ widgetProduct, open, setOpen}) => {
           const { data, error } = await supabaseClient
             .from('cartItems')
             .select()
-            .eq('id', id)
+            .eq('id', uniqueId)
+
+            console.log('product widget', data)
   
-            if (data.length > 0) {
+            if (data) {
               // if data exists get its quantity and add it to new quantity
               const newQuantity = data[0].quantity + counter
   
@@ -42,7 +49,7 @@ const ProductPage = ({ widgetProduct, open, setOpen}) => {
               const { error } = await supabaseClient
                 .from('cartItems')
                 .update({ quantity: newQuantity })
-                .eq('id', id)
+                .eq('id', uniqueId)
   
                 if (error) {
                   // console any error we encounter along the way
@@ -60,7 +67,7 @@ const ProductPage = ({ widgetProduct, open, setOpen}) => {
                 .from('cartItems')
                 .insert(
                   {
-                    id,
+                    id: uniqueId,
                     name,
                     price,
                     image_src: imageSrc,

@@ -30,15 +30,12 @@ const ProductDisplay = ({ customerID }) => {
     const supabaseClient = useSupabaseClient()
 
     const addIdToStripe = async (subscriptionId, clientSecret) => {
-        if(user){
-            console.log(user, 'user product display')
-            if(subscriptionId && clientSecret){
+        if(subscriptionId && clientSecret){
+            if(user){
                 // retrieve the data on the database to create ids 
                 const {data, error} = await supabaseClient
-                    .from('stripe_data')
+                    .from('stripeData')
                     .select('*')
-
-                    console.log(data,'data getting saved' )
     
                     if(!error){
                         // create a new data ID using the length of the data array
@@ -47,7 +44,7 @@ const ProductDisplay = ({ customerID }) => {
     
                         //insert a new data row with the new Id
                         const { error } = await supabaseClient
-                        .from('stripe_data')
+                        .from('stripeData')
                         .insert(
                             {
                                 id,
@@ -69,11 +66,14 @@ const ProductDisplay = ({ customerID }) => {
                     }
                     else{
                         console.log('error retrieving data', error)
-                    }   
-                
-            }
+                    } 
 
+            }else{
+                return
+            }
+            
         }
+
 
     }
 
