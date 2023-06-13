@@ -3,13 +3,14 @@ import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 import { server } from '../config';
 
 const Pricing = ({ email, customerID}) => { 
-  console.log('customer ID pricing', customerID)
   return (
     <div>
       <ProductDisplay customerID={customerID} />
     </div>
   )
 }
+
+
 
 export const getServerSideProps = async (ctx) => {
   // Create authenticated Supabase Client
@@ -51,7 +52,7 @@ export const getServerSideProps = async (ctx) => {
   
 
     //saves the customer ID if the customer exists
-    if (findCustomer.length > 0) {
+    if (findCustomer && findCustomer.length > 0) {
       return findCustomer[0].id
     } else {
       // if the customer does not exist create customer
@@ -91,7 +92,8 @@ export const getServerSideProps = async (ctx) => {
         }
       })
       const ListedSubscriptions = await res.json();
-      if(ListedSubscriptions.subscriptionList.data.length > 0){
+      const subscriptionData = ListedSubscriptions.subscriptionList.data
+      if(subscriptionData && subscriptionData.length > 0){
         // filter through the subscriptions using the customer ID
 
         const filteredSubscription = ListedSubscriptions.subscriptionList.data.filter(subscription => {

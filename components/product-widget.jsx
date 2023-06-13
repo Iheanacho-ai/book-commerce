@@ -8,7 +8,6 @@ import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
 
 
 const ProductPage = ({ widgetProduct, open, setOpen, sessionid}) => {
-  console.log('sessionnId product widget', sessionid)
   const router = useRouter()
   const [counter, setCounter] = useState(0)
   const user = useUser()
@@ -26,30 +25,28 @@ const ProductPage = ({ widgetProduct, open, setOpen, sessionid}) => {
       if (counter > 0) {
         const { name, price, imageSrc, imageAlt, id } = widgetProduct[0]
         // create a special id for each product and user
-        const uniqueId = id
+        const uniqueId =`${sessionid}-${id}`
         
-        console.log('uniqueID', uniqueId)
 
         if(user){
           console.log(user)
           //check if the object exists already on our database using the ID
           const { data, error } = await supabaseClient
-            .from('cartItems')
+            .from('cart_items')
             .select()
-            .eq('id', uniqueId)
+            .eq('id', id)
 
-            console.log('product widget', data)
   
-            if (data.length > 0) {
+            if (data && data.length > 0) {
               // if data exists get its quantity and add it to new quantity
               const newQuantity = data[0].quantity + counter
   
               //update the cart item on the database
   
               const { error } = await supabaseClient
-                .from('cartItems')
+                .from('cart_items')
                 .update({ quantity: newQuantity })
-                .eq('id', uniqueId)
+                .eq('id', id)
   
                 if (error) {
                   // console any error we encounter along the way
@@ -64,15 +61,16 @@ const ProductPage = ({ widgetProduct, open, setOpen, sessionid}) => {
             } else {
               // add a new item if the item is not available on our database
               const { error } = await supabaseClient
-                .from('cartItems')
+                .from('cart_items')
                 .insert(
                   {
-                    id: uniqueId,
+                    id: id,
                     name,
                     price,
                     image_src: imageSrc,
                     image_alt: imageAlt,
-                    quantity: counter
+                    quantity: counter,
+                    item_id: uniqueId
                   }
                 )
   

@@ -25,17 +25,14 @@ const Bag = ({session}) => {
     if(user){
       console.log(user)
       const { data, error } = await supabaseClient
-        .from('cartItems')
+        .from('cart_items')
         .select('*')
-        console.log(data, 'data from the order')
       
         if (error) {
           console.log(error)
         } else {
           setCartData(data) 
         }
-
-      console.log('order of the user', data)
 
     }
   }
@@ -47,7 +44,7 @@ const Bag = ({session}) => {
 
   const deleteData = async (id) => {
     const { error } = await supabaseClient
-      .from('cartItems')
+      .from('cart_items')
       .delete()
       .eq('id', id)
 

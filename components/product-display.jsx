@@ -23,7 +23,7 @@ const subscriptionPackages = [
     },
 ]
 
-const ProductDisplay = ({ customerID }) => {
+const ProductDisplay = ({ customerID, sessionid }) => {
     const router = useRouter()
     const [overlay, setOverlay] = useState(false)
     const user = useUser()
@@ -34,17 +34,17 @@ const ProductDisplay = ({ customerID }) => {
             if(user){
                 // retrieve the data on the database to create ids 
                 const {data, error} = await supabaseClient
-                    .from('stripeData')
+                    .from('stripe_data')
                     .select('*')
 
-                    console.log(data, 'yeah yeah')
-
     
-                    if(!error){   
+                    if(!error){  
+                        console.log(data, 'data in the if and else block') 
+                        console.log(data.length, 'data length in the if and else block')
                         if(data.length > 0){
                             // if there is an exisiting stripe data update the data
                             const { error } = await supabaseClient
-                                .from('stripeData')
+                                .from('stripe_data')
                                 .update({subscriptionId, clientSecret})
                                 .eq('id', 1)
                             
@@ -59,18 +59,22 @@ const ProductDisplay = ({ customerID }) => {
 
                         }else{
                             alert('yeah')
+                            //create a unique id for each user that signs in
+                            const uniqueId =`${sessionid}-1`
                             // if there is not an exisiting stripe data create a new one
                             const { error } = await supabaseClient
-                                .from('stripeData')
+                                .from('stripe_data')
                                 .insert(
                                     {
                                         id: 1,
                                         subscriptionId: subscriptionId,
-                                        clientSecret: clientSecret
+                                        clientSecret: clientSecret,
+                                        item_id: uniqueId
                                     }
                     
                     
                                 )
+
                             
                             if(error){
                                 console.log('error creating a new stripe data on the database', error)
@@ -195,5 +199,30 @@ const ProductDisplay = ({ customerID }) => {
     )
 }
 
+
+export const getServerSideProps = async (ctx) => {
+    // Create authenticated Supabase Client
+    const supabase = createServerSupabaseClient(ctx)
+    // Check if we have a session
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    // collect the subscription of a user 
+  
+    if (!session)
+      return {
+        redirect: {
+          destination: '/',
+          permanent: false,
+        },
+    }
+  
+    return {
+      props: {
+        sessionid: session.user.id,
+      },
+    }
+}
 
 export default ProductDisplay;

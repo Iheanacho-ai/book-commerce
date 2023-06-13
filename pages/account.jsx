@@ -10,7 +10,7 @@ const AccountPage = ({user}) => {
 
     const cancelSubscription = async () => {
         const { data, error } = await supabaseClient
-            .from('stripeData')
+            .from('stripe_data')
             .select('*')
       
         if (error) {

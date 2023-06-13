@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 
 const CatalogPage = ({sessionid}) => {
-    console.log('session id catalog page', sessionid)
     const router = useRouter()
     const [open, setOpen] = useState(false)
     const [widgetProduct, setWidgetProduct] = useState()
@@ -149,7 +148,6 @@ export const getServerSideProps = async (ctx) => {
       data: { session },
     } = await supabase.auth.getSession()
 
-    console.log(session.user.id)
     // collect the subscription of a user 
   
     if (!session)
