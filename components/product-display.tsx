@@ -1,6 +1,18 @@
+import React from 'react';
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react';
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
+import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
+import { GetServerSideProps } from 'next';
+
+interface ServerSideProps {
+  sessionid: string;
+}
+
+interface ProductDisplayProps {
+    customerID: string;
+    sessionid: string;
+}
 
 const subscriptionPackages = [
     {
@@ -23,114 +35,102 @@ const subscriptionPackages = [
     },
 ]
 
-const ProductDisplay = ({ customerID, sessionid }) => {
+
+const ProductDisplay: React.FC<ProductDisplayProps> = ({ customerID, sessionid }) => {
     const router = useRouter()
     const [overlay, setOverlay] = useState(false)
     const user = useUser()
     const supabaseClient = useSupabaseClient()
 
-    const addIdToStripe = async (subscriptionId, clientSecret) => {
-        if(subscriptionId && clientSecret){
-            if(user){
-                // retrieve the data on the database to create ids 
-                const {data, error} = await supabaseClient
-                    .from('stripe_data')
-                    .select('*')
-
-    
-                    if(!error){  
-                        console.log(data, 'data in the if and else block') 
-                        console.log(data.length, 'data length in the if and else block')
-                        if(data.length > 0){
-                            // if there is an exisiting stripe data update the data
-                            const { error } = await supabaseClient
-                                .from('stripe_data')
-                                .update({subscriptionId, clientSecret})
-                                .eq('id', 1)
-                            
-                                if(error){
-                                    console.log('error creating updating stripe data database', error)
-                                }else{
-                                    // if there is no error route to the payment page to collect user information
-                                    router.push('/payment') 
-                                }
-
-                                
-
-                        }else{
-                            alert('yeah')
-                            //create a unique id for each user that signs in
-                            const uniqueId =`${sessionid}-1`
-                            // if there is not an exisiting stripe data create a new one
-                            const { error } = await supabaseClient
-                                .from('stripe_data')
-                                .insert(
-                                    {
-                                        id: 1,
-                                        subscriptionId: subscriptionId,
-                                        clientSecret: clientSecret,
-                                        item_id: uniqueId
-                                    }
-                    
-                    
-                                )
-
-                            
-                            if(error){
-                                console.log('error creating a new stripe data on the database', error)
-                            }else{
-                                // if there is no error route to the payment page to collect user information
-                                router.push('/payment') 
-                            }
-                        }
-    
-                    }
-                    else{
-                        console.log('error retrieving data', error)
-                    } 
-
-            }else{
-                return
+    const addIdToStripe = async (subscriptionId: string, clientSecret: string) => {
+        if (subscriptionId && clientSecret) {
+          if (user) {
+            // retrieve the data on the database to create ids
+            const { data, error } = await supabaseClient
+              .from('stripe_data')
+              .select('*');
+      
+            if (!error) {
+              console.log(data, 'data in the if and else block');
+              console.log(data.length, 'data length in the if and else block');
+              if (data.length > 0) {
+                // if there is an existing stripe data, update the data
+                const { error } = await supabaseClient
+                  .from('stripe_data')
+                  .update({ subscriptionId, clientSecret })
+                  .eq('id', 1);
+      
+                if (error) {
+                  console.log('error creating updating stripe data database', error);
+                } else {
+                  // if there is no error, route to the payment page to collect user information
+                  router.push('/payment');
+                }
+              } else {
+                alert('yeah');
+                // create a unique id for each user that signs in
+                const uniqueId = `${sessionid}-1`;
+                // if there is no existing stripe data, create a new one
+                const { error } = await supabaseClient
+                  .from('stripe_data')
+                  .insert({
+                    id: 1,
+                    subscriptionId: subscriptionId,
+                    clientSecret: clientSecret,
+                    item_id: uniqueId
+                  });
+      
+                if (error) {
+                  console.log('error creating a new stripe data on the database', error);
+                } else {
+                  // if there is no error, route to the payment page to collect user information
+                  router.push('/payment');
+                }
+              }
+            } else {
+              console.log('error retrieving data', error);
             }
-            
+          } else {
+            return;
+          }
         }
+    };
+      
 
-
-    }
-
-    const createSubscription = async (priceID) => {
+    const createSubscription = async (priceID: string) => {
         // Change the button to Loading
-        const UpdateLoading = subscriptionPackages.find((obj) => obj.priceID === priceID);
-        UpdateLoading.loading = true
+        const UpdateLoading = subscriptionPackages.find((obj) => obj.priceID === priceID) as typeof subscriptionPackages[number] | undefined;
+        if (UpdateLoading) {
+          UpdateLoading.loading = true;
+        }
         
-        setOverlay(true)
+        setOverlay(true);
         // create a new subscription
         try {
-            const subscriptionDetails = await fetch('/api/create-subscription', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
-                },
-                body: JSON.stringify({
-                    priceID,
-                    customerID
-                })
+          const subscriptionDetails = await fetch('/api/create-subscription', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
+            },
+            body: JSON.stringify({
+              priceID,
+              customerID
             })
-
-            const newSubscription = await subscriptionDetails.json();
-            const {subscriptionId, clientSecret} = newSubscription
-
-            // add the subscriptionId and Client secret data from stripe to supabase
-            
-            addIdToStripe(subscriptionId, clientSecret)
-
-
+          });
+      
+          const newSubscription = await subscriptionDetails.json();
+          const { subscriptionId, clientSecret } = newSubscription;
+      
+          // add the subscriptionId and Client secret data from stripe to supabase
+          addIdToStripe(subscriptionId, clientSecret);
         } catch (error) {
-            // console any error encountered during gathering of the data
-            console.log(error)
+          // console any error encountered during gathering of the data
+          console.log(error);
         }
-    }
+    };
+      
+      
 
 
     return (
@@ -200,29 +200,30 @@ const ProductDisplay = ({ customerID, sessionid }) => {
 }
 
 
-export const getServerSideProps = async (ctx) => {
-    // Create authenticated Supabase Client
-    const supabase = createServerSupabaseClient(ctx)
-    // Check if we have a session
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-
-    // collect the subscription of a user 
+export const getServerSideProps: GetServerSideProps<ServerSideProps> = async (ctx) => {
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx);
   
-    if (!session)
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-    }
+  // Check if we have a session
+  const { data: { session } } = await supabase.auth.getSession();
   
+  // collect the subscription of a user
+  
+  if (!session) {
     return {
-      props: {
-        sessionid: session.user.id,
+      redirect: {
+        destination: '/',
+        permanent: false,
       },
-    }
-}
+    };
+  }
+  
+  return {
+    props: {
+      sessionid: session.user.id,
+    },
+  };
+};
+
 
 export default ProductDisplay;

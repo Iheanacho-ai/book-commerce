@@ -3,7 +3,7 @@ import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useRouter } from 'next/router'
 import { server } from '../config';
 
-const LoginPage = () => {
+const LoginPage = ()=> {
   const supabaseClient = useSupabaseClient()
   const user = useUser()
   const router = useRouter()

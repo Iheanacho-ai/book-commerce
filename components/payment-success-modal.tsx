@@ -1,15 +1,20 @@
-import { Fragment } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
-import { FaCheck } from "react-icons/fa";
+import { Fragment } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { FaCheck } from 'react-icons/fa';
 import { useRouter } from 'next/router';
 
-const PaymentSuccess = ({open, setOpen }) => {
-  const router = useRouter()
+interface PaymentSuccessProps {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}
+
+const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ open, setOpen }) => {
+  const router = useRouter();
+
   const continueApplication = () => {
     setOpen(false);
-    router.push('/catalog-page') 
-
-  }
+    router.push('/catalog-page');
+  };
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -41,7 +46,7 @@ const PaymentSuccess = ({open, setOpen }) => {
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <div className="sm:flex sm:items-start">
                     <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
-                      <FaCheck/>
+                      <FaCheck />
                     </div>
                     <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                       <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
@@ -70,7 +75,7 @@ const PaymentSuccess = ({open, setOpen }) => {
         </div>
       </Dialog>
     </Transition.Root>
-  )
-}
+  );
+};
 
 export default PaymentSuccess;

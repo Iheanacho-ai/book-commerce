@@ -1,43 +1,49 @@
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
 import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useRouter } from 'next/router'
+import { GetServerSideProps, NextPageContext } from 'next';
+
+interface ServerSideProps {
+    initialSession: any;
+    user: any;
+}
 
 
-const AccountPage = ({user}) => {
-    const supabaseClient = useSupabaseClient()
-    const router = useRouter()
-    
-
+const AccountPage = ({ user }: { user: any }) => {
+    const supabaseClient = useSupabaseClient();
+    const router = useRouter();
+  
     const cancelSubscription = async () => {
-        const { data, error } = await supabaseClient
-            .from('stripe_data')
-            .select('*')
+        const { data, error } = await supabaseClient.from('stripe_data').select('*');
       
         if (error) {
-          console.log(error)
+          console.log(error);
+          return;
         }
+      
+        const subscriptionData = data[0]; // Assuming you expect only one record
+      
         try {
-            await fetch('/api/cancel-subscription', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`
-                },
-                body: JSON.stringify({
-                   subscriptionId: data.subscriptionId
-                })
-            }) 
+          await fetch('/api/cancel-subscription', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+            },
+            body: JSON.stringify({
+              subscriptionId: subscriptionData.subscriptionId,
+            }),
+          });
         } catch (error) {
-            console.log(error)            
+          console.log(error);
         }
-
-    }
-
-
+    };
+      
+  
     const signOut = async () => {
-       await supabaseClient.auth.signOut();
-       router.reload()
-    }
+      await supabaseClient.auth.signOut();
+      router.reload();
+    };
     
     return(
         <div className="account-page w-full flex justify-center">
@@ -79,30 +85,34 @@ const AccountPage = ({user}) => {
     )
 } 
 
-export const getServerSideProps = async (ctx) => {
-    // Create authenticated Supabase Client
-    const supabase = createServerSupabaseClient(ctx)
-    // Check if we have a session
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
 
-    // collect the subscription of a user 
-  
-    if (!session)
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-    }
-  
+
+
+export const getServerSideProps: GetServerSideProps<ServerSideProps> = async (ctx) => {
+  // Create authenticated Supabase Client
+  const supabase = createServerSupabaseClient(ctx);
+
+  // Check if we have a session
+  const { data: { session } } = await supabase.auth.getSession();
+
+  // collect the subscription of a user
+
+  if (!session) {
     return {
-      props: {
-        initialSession: session,
-        user: session.user,
+      redirect: {
+        destination: '/',
+        permanent: false,
       },
-    }
-}
+    };
+  }
+
+  return {
+    props: {
+      initialSession: session,
+      user: session.user,
+    },
+  };
+};
+
 
 export default AccountPage;

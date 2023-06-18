@@ -1,8 +1,10 @@
 import Stripe from 'stripe';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2020-08-27', // Replace with your desired Stripe API version
+});
 
-const handler = async (req, res) => {
+const handler = async (req:NextApiRequest, res:NextApiResponse) => {
   //gather all the subscriptions created on the database
   try {
     const subscriptionList = await stripe.subscriptions.list({

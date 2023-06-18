@@ -6,8 +6,23 @@ import Counter from './counter'
 import { useRouter } from 'next/router'
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
 
+interface WidgetProduct {
+  id: number;
+  name: string;
+  price: number;
+  imageSrc: string;
+  imageAlt: string;
+}
 
-const ProductPage = ({ widgetProduct, open, setOpen, sessionid}) => {
+
+interface ProductPageProps {
+  widgetProduct: WidgetProduct;
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  sessionid: string;
+}
+
+const ProductPage: React.FC<ProductPageProps> = ({ widgetProduct, open, setOpen, sessionid }) => {
   const router = useRouter()
   const [counter, setCounter] = useState(0)
   const user = useUser()
@@ -23,7 +38,7 @@ const ProductPage = ({ widgetProduct, open, setOpen, sessionid}) => {
       // checks if the quantity of the wishlist item is greater than zero
 
       if (counter > 0) {
-        const { name, price, imageSrc, imageAlt, id } = widgetProduct[0]
+        const { name, price, imageSrc, imageAlt, id } = widgetProduct
         // create a special id for each product and user
         const uniqueId =`${sessionid}-${id}`
         
@@ -138,10 +153,10 @@ const ProductPage = ({ widgetProduct, open, setOpen, sessionid}) => {
                     widgetProduct ? (
                       <div className="grid w-full grid-cols-1 items-start gap-y-8 gap-x-6 sm:grid-cols-12 lg:gap-x-8">
                         <div className="aspect-w-2 aspect-h-3 overflow-hidden rounded-lg bg-gray-100 sm:col-span-4 lg:col-span-5">
-                          <img src={widgetProduct[0].imageSrc} alt={widgetProduct[0].imageAlt} className="object-cover object-center" />
+                          <img src={widgetProduct.imageSrc} alt={widgetProduct.imageAlt} className="object-cover object-center" />
                         </div>
                         <div className="sm:col-span-8 lg:col-span-7">
-                          <h2 className="text-2xl font-bold text-gray-900 sm:pr-12">{widgetProduct[0].name}</h2>
+                          <h2 className="text-2xl font-bold text-gray-900 sm:pr-12">{widgetProduct.name}</h2>
 
                           <section aria-labelledby="information-heading" className="mt-2">
                             <h3 id="information-heading" className="sr-only">
@@ -152,7 +167,7 @@ const ProductPage = ({ widgetProduct, open, setOpen, sessionid}) => {
                               Lorem ipsum dolor sit amet consectetur adipisicing elit. Nemo voluptatibus nesciunt dolores tenetur, alias ullam porro et mollitia autem quis corporis eligendi, nulla minima vitae? Atque, sequi? Delectus, itaque id.
                             </p>
 
-                            <p className="text-2xl text-gray-900">${widgetProduct[0].price}</p>
+                            <p className="text-2xl text-gray-900">${widgetProduct.price}</p>
                           </section>
 
                           <section aria-labelledby="options-heading" className="mt-5">
