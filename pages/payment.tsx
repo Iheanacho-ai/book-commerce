@@ -4,7 +4,6 @@ import CheckoutForm from '../components/checkout-form';
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 import { GetServerSideProps, NextPage } from 'next';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 interface PaymentProps {
   clientSecret: string;
@@ -12,9 +11,7 @@ interface PaymentProps {
 
 const Payment: NextPage<PaymentProps> = ({ clientSecret }) => {
   return (
-    <Elements stripe={stripePromise}>
-      <CheckoutForm clientSecret={clientSecret} />
-    </Elements>
+    <CheckoutForm clientSecret={clientSecret} />
   );
 };
 
@@ -40,11 +37,18 @@ export const getServerSideProps: GetServerSideProps<PaymentProps> = async (ctx) 
   console.log(data, 'payment');
   if (error) {
     console.log(error);
+    return{
+      redirect: {
+        destination: '/error',
+        permanent: false,
+
+      }
+    }
   }
 
   return {
     props: {
-      clientSecret: data[0].clientSecret,
+      clientSecret: data ? data[0].clientSecret : null
     },
   };
 };

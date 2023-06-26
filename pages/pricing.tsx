@@ -6,12 +6,13 @@ import { GetServerSideProps, NextPage } from 'next';
 interface PricingProps {
   email: string;
   customerID: string;
+  sessionid: string;
 }
 
-const Pricing: NextPage<PricingProps> = ({ email, customerID }) => {
+const Pricing: NextPage<PricingProps> = ({ email, customerID, sessionid }) => {
   return (
     <div>
-      <ProductDisplay customerID={customerID} />
+      <ProductDisplay customerID={customerID} sessionid={sessionid} />
     </div>
   );
 };
@@ -40,6 +41,8 @@ export const getServerSideProps: GetServerSideProps<PricingProps> = async (ctx) 
       });
 
       const searchedCustomer = await res.json();
+
+      //save customer data in a variable
       findCustomer = searchedCustomer.checkCustomer.data;
     } catch (error) {
       console.log(error);
@@ -103,6 +106,8 @@ export const getServerSideProps: GetServerSideProps<PricingProps> = async (ctx) 
 
   const status = await findExisitingSubscriptions(customerID);
 
+  console.log(status)
+
   if (!session) {
     // if there is no active user session, redirect to the signin page
     return {
@@ -111,8 +116,8 @@ export const getServerSideProps: GetServerSideProps<PricingProps> = async (ctx) 
         permanent: false,
       },
     };
-  }
-
+  } 
+  
   else if (status === 'active') {
     // if the user is authenticated and has an active subscription, redirect to the catalog page
     return {
@@ -121,12 +126,24 @@ export const getServerSideProps: GetServerSideProps<PricingProps> = async (ctx) 
         permanent: false,
       },
     };
+  } 
+  
+  else if (status !== 'active'){
+    // if the user is authenticated but does not have active subscription, render the Pricing Page
+    return {
+      props: {
+        email,
+        customerID,
+        sessionid: session.user.id,
+      },
+    }
   }
 
   return {
     props: {
       email,
       customerID,
+      sessionid: session.user.id,
     },
   };
 };

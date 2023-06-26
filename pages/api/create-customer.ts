@@ -2,9 +2,12 @@ import Stripe from 'stripe';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2020-08-27', // Replace with your desired Stripe API version
-});
+export const stripeKey: string = (process.env.STRIPE_SECRET_KEY as string)
 
+const stripe = new Stripe(stripeKey, {
+  apiVersion: '2022-11-15',
+  // Replace with your desired Stripe API version
+});
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { email } = req.body;
@@ -26,5 +29,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 };
 
 export default handler;
+
 
 

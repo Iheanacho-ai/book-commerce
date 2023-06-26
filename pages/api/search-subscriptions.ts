@@ -1,7 +1,10 @@
 import Stripe from 'stripe';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { stripeKey } from './create-customer';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2020-08-27', // Replace with your desired Stripe API version
+const stripe = new Stripe(stripeKey, {
+  apiVersion: '2022-11-15',
+  // Replace with your desired Stripe API version
 });
 
 const handler = async (req:NextApiRequest, res:NextApiResponse) => {

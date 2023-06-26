@@ -7,11 +7,10 @@ import {
 } from '@stripe/react-stripe-js';
 
 interface CheckoutFormProps {
-  stripe: any;
   clientSecret: string;
 }
 
-const CheckoutForm: React.FC<CheckoutFormProps> = ({ stripe, clientSecret }) => {
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ clientSecret }) => {
   const stripeInstance = useStripe();
   const elements = useElements();
   const [name, setName] = useState<string | undefined>();
@@ -22,23 +21,27 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ stripe, clientSecret }) => 
       return;
     }
 
-    const { paymentIntent, error } = await stripeInstance.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement),
-        billing_details: {
-          name,
-        },
-      },
-    });
+    const cardElement = elements.getElement(CardElement);
 
-    if (error) {
-      console.log(error);
-    } else if (paymentIntent.status === 'succeeded') {
-      setOpen(true);
-    } else {
-      console.log('Unexpected PaymentIntent status', paymentIntent.status);
-    }
-  };
+    if (cardElement instanceof HTMLInputElement) {
+      const card = { card: cardElement };
+      const { paymentIntent, error } = await stripeInstance.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: card.card,
+          billing_details: {
+            name,
+          },
+        },
+      });
+
+      if (error) {
+        console.log(error);
+      } else if (paymentIntent.status === 'succeeded') {
+        setOpen(true);
+      } else {
+        console.log('Unexpected PaymentIntent status', paymentIntent.status);
+      }
+    }};
 
   return (
     <section className="abg-gray-100 text-gray-600 min-h-3/4 p-4">

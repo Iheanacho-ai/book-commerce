@@ -1,7 +1,10 @@
 import Stripe from 'stripe';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { stripeKey } from './create-customer';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2020-08-27', // Replace with your desired Stripe API version
+const stripe = new Stripe(stripeKey, {
+  apiVersion: '2022-11-15',
+  // Replace with your desired Stripe API version
 });
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -18,13 +21,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       expand: ['latest_invoice.payment_intent'],
     });
 
+    if (typeof subscription.latest_invoice === 'string' ) {
+      // Handle case where latest_invoice is a string
+      throw new Error('Invalid invoice data');
+    }
+
+    const clientSecret =
+      (subscription.latest_invoice?.payment_intent as Stripe.PaymentIntent)
+        ?.client_secret || '';
+    
     res.send({
       subscriptionId: subscription.id,
-      clientSecret: subscription.latest_invoice.payment_intent.client_secret,
+      clientSecret: clientSecret,
     });
 
     console.log(subscription);
-  } catch (error) {
+  } catch (error:any) {
     console.log(error);
     return res.status(400).send({ error: { message: error.message } });
   }

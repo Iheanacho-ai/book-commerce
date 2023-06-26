@@ -1,8 +1,13 @@
 import Stripe from 'stripe';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { stripeKey } from './create-customer';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+const stripe = new Stripe(stripeKey, {
+  apiVersion: '2022-11-15',
+  // Replace with your desired Stripe API version
+});
 
-const handler= async (req, res) => {
+const handler= async (req:NextApiRequest, res:NextApiResponse) => {
     const {subscriptionId} = req.body
     try {
         const deletedSubscription = await stripe.subscriptions.del(
