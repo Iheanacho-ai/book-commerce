@@ -9,9 +9,15 @@ interface PaymentProps {
   clientSecret: string;
 }
 
+const publishableKey: string = (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string)
+const stripePromise = loadStripe(publishableKey); // Replace with your actual Stripe publishable key
+
+
 const Payment: NextPage<PaymentProps> = ({ clientSecret }) => {
   return (
-    <CheckoutForm clientSecret={clientSecret} />
+    <Elements stripe={stripePromise}>
+      <CheckoutForm clientSecret={clientSecret} />
+    </Elements>
   );
 };
 
@@ -34,7 +40,6 @@ export const getServerSideProps: GetServerSideProps<PaymentProps> = async (ctx) 
   // get the client secret from the supabase database
   const { data, error } = await supabase.from('stripe_data').select('*');
 
-  console.log(data, 'payment');
   if (error) {
     console.log(error);
     return{

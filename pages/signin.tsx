@@ -6,7 +6,7 @@ import { server } from '../config';
 const LoginPage = ()=> {
   const supabaseClient = useSupabaseClient()
   const user = useUser()
-  const router = useRouter()
+  const router = useRouter()    
 
   if(user){
     router.push('/pricing');

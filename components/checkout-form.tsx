@@ -16,32 +16,35 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ clientSecret }) => {
   const [name, setName] = useState<string | undefined>();
   const [open, setOpen] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     if (elements == null || stripeInstance == null) {
       return;
     }
-
+  
     const cardElement = elements.getElement(CardElement);
-
-    if (cardElement instanceof HTMLInputElement) {
-      const card = { card: cardElement };
+  
+    if (cardElement) {
       const { paymentIntent, error } = await stripeInstance.confirmCardPayment(clientSecret, {
         payment_method: {
-          card: card.card,
+          card: cardElement,
           billing_details: {
             name,
           },
         },
       });
-
+  
       if (error) {
-        console.log(error);
+        console.log("Error", error)
       } else if (paymentIntent.status === 'succeeded') {
         setOpen(true);
       } else {
         console.log('Unexpected PaymentIntent status', paymentIntent.status);
       }
-    }};
+    } else {
+      console.log('Card element is null');
+    }
+  };
 
   return (
     <section className="abg-gray-100 text-gray-600 min-h-3/4 p-4">
@@ -77,7 +80,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ clientSecret }) => {
                   <div className="mb-4">
                     <button
                       className="font-medium text-sm inline-flex items-center justify-center px-3 py-2 border border-transparent rounded leading-5 shadow-sm transition duration-150 ease-in-out w-full bg-indigo-500 hover:bg-indigo-600 text-white focus:outline-none focus-visible:ring-2"
-                      type="button"
+                      type="submit"
                       disabled={!stripeInstance || !elements}
                     >
                       Subscribe

@@ -67,7 +67,6 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ customerID, sessionid }
                   router.push('/payment');
                 }
               } else {
-                alert('yeah');
                 // create a unique id for each user that signs in
                 const uniqueId = `${sessionid}-1`;
                 // if there is no existing stripe data, create a new one
