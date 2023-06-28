@@ -118,15 +118,15 @@ export const getServerSideProps: GetServerSideProps<PricingProps> = async (ctx) 
     };
   } 
   
-  // else if (status === 'active') {
-  //   // if the user is authenticated and has an active subscription, redirect to the catalog page
-  //   return {
-  //     redirect: {
-  //       destination: '/catalog-page',
-  //       permanent: false,
-  //     },
-  //   };
-  // } 
+  else if (status === 'active') {
+    // if the user is authenticated and has an active subscription, redirect to the catalog page
+    return {
+      redirect: {
+        destination: '/catalog-page',
+        permanent: false,
+      },
+    };
+  } 
   
   else if (status !== 'active'){
     // if the user is authenticated but does not have active subscription, render the Pricing Page

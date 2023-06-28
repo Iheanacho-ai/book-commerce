@@ -15,12 +15,16 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ clientSecret }) => {
   const elements = useElements();
   const [name, setName] = useState<string | undefined>();
   const [open, setOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    //
     event.preventDefault();
     if (elements == null || stripeInstance == null) {
       return;
     }
+
+    setIsProcessing(true)
   
     const cardElement = elements.getElement(CardElement);
   
@@ -41,8 +45,11 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ clientSecret }) => {
       } else {
         console.log('Unexpected PaymentIntent status', paymentIntent.status);
       }
+
+      setIsProcessing(false)
     } else {
       console.log('Card element is null');
+      setIsProcessing(false)
     }
   };
 
@@ -81,9 +88,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ clientSecret }) => {
                     <button
                       className="font-medium text-sm inline-flex items-center justify-center px-3 py-2 border border-transparent rounded leading-5 shadow-sm transition duration-150 ease-in-out w-full bg-indigo-500 hover:bg-indigo-600 text-white focus:outline-none focus-visible:ring-2"
                       type="submit"
-                      disabled={!stripeInstance || !elements}
+                      disabled={!stripeInstance || !elements || isProcessing}
                     >
-                      Subscribe
+                      {isProcessing ? "Processing" : "Subscribe"}
                     </button>
                   </div>
                 </div>
