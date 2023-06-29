@@ -4,12 +4,11 @@ import { server } from '../config';
 import { GetServerSideProps, NextPage } from 'next';
 
 interface PricingProps {
-  email: string;
   customerID: string;
   sessionid: string;
 }
 
-const Pricing: NextPage<PricingProps> = ({ email, customerID, sessionid }) => {
+const Pricing: NextPage<PricingProps> = ({customerID, sessionid }) => {
   return (
     <div>
       <ProductDisplay customerID={customerID} sessionid={sessionid} />
@@ -74,8 +73,10 @@ export const getServerSideProps: GetServerSideProps<PricingProps> = async (ctx) 
   };
 
   const customerID = await createCustomerID();
+  console.log('customerID', customerID)
 
   const findExisitingSubscriptions = async (customerID: string) => {
+    console.log('customerID in the findExisting Subscriptions', customerID)
     // retrieve all the subscriptions from the Stripe database
     try {
       const res = await fetch(`${server}/api/search-subscriptions`, {
@@ -95,6 +96,8 @@ export const getServerSideProps: GetServerSideProps<PricingProps> = async (ctx) 
           return subscription.customer === customerID;
         });
 
+        //return the subscription status
+
         return filteredSubscription[0].status;
       } else {
         return;
@@ -104,9 +107,9 @@ export const getServerSideProps: GetServerSideProps<PricingProps> = async (ctx) 
     }
   };
 
+
   const status = await findExisitingSubscriptions(customerID);
 
-  console.log(status)
 
   if (!session) {
     // if there is no active user session, redirect to the signin page
